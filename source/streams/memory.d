@@ -12,6 +12,8 @@ private {
 	import std.array: appender, Appender;
 
 	import io.stream;
+
+	import streams: copyTo;
 }
 
 /**
@@ -20,7 +22,7 @@ private {
  * Params:
  * 	data = Immutable byte array.
  */
-static @nogc @safe auto memoryStream(immutable(ubyte)[] data) nothrow pure {
+static @nogc auto memoryStream(immutable(ubyte)[] data) nothrow {
 	return ReadOnlyMemoryStream(data);
 }
 
@@ -30,7 +32,7 @@ static @nogc @safe auto memoryStream(immutable(ubyte)[] data) nothrow pure {
  * Params:
  * 	data = Byte array.
  */
-static @safe auto memoryStream(ubyte[] data) nothrow pure {
+static auto memoryStream(ubyte[] data) nothrow {
 	return MemoryStream(data);
 }
 
@@ -40,14 +42,14 @@ static @safe auto memoryStream(ubyte[] data) nothrow pure {
  * Params:
  * 	size = Amount of bytes to preallocate.
  */
-static @safe auto memoryStream(size_t size) nothrow pure {
+static auto memoryStream(size_t size) nothrow {
 	return MemoryStream(size);
 }
 
 /**
  * Creates a memory stream.
  */
-static @nogc @safe auto memoryStream() nothrow pure {
+static @nogc auto memoryStream() nothrow {
 	return MemoryStream();
 }
 
@@ -78,7 +80,7 @@ static auto copyToMemory(Source)(
 /**
  * A read-only memory stream.
  */
-struct ReadOnlyMemoryStreamBase {
+struct ReadOnlyMemoryStream {
 	private size_t position = 0;
 	private immutable (ubyte)[] buffer;
 
@@ -144,7 +146,7 @@ struct ReadOnlyMemoryStreamBase {
 /**
  * A mutable memory stream.
  */
-struct MemoryStreamBase {
+struct MemoryStream {
 	private size_t position = 0;
 	private Appender!(ubyte[]) buffer;
 
@@ -218,7 +220,3 @@ struct MemoryStreamBase {
 		return buffer.data[i..j];
 	}
 }
-
-import std.typecons;
-alias MemoryStream = StreamShim!MemoryStreamBase;
-alias ReadOnlyMemoryStream = StreamShim!ReadOnlyMemoryStreamBase;

@@ -151,10 +151,6 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 	}
 }
 
-import std.typecons;
-import io.buffer: FixedBuffer;
-alias ZlibStream(Stream) = RefCounted!(StreamShim!(FixedBuffer!(ZlibStreamBase!Stream)), RefCountedAutoInitialize.no);
-
 enum Encoding {
 	Guess,
 	Zlib,
@@ -182,4 +178,18 @@ class ZlibException: Exception {
 	@nogc @safe this(in string msg) pure nothrow {
 		super(msg);
 	}
+}
+
+import std.typecons;
+import io.buffer: FixedBuffer;
+alias ZlibStream(Stream) = RefCounted!(FixedBuffer!(ZlibStreamBase!Stream), RefCountedAutoInitialize.no);
+
+unittest {
+	import streams.memory;
+
+	// this is zlib encoded string "drocks"
+	immutable(ubyte)[] raw = [0x78,0x9C,0x4B,0x29,0xCA,0x4F,0xCE,0x2E,0x06,0x00,0x08,0xC6,0x02,0x87];
+	auto mem = memoryStream(raw);
+	auto zlib = zlibStream(mem);
+	assert("drocks" == zlib.copyToMemory.data);
 }
