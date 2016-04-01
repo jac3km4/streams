@@ -113,7 +113,7 @@ static void rawWrite(Endian e = Endian.littleEndian, Struct, Sink)(auto ref Sink
 }
 
 unittest {
-	import io.streams.memory;
+	import streams.memory;
 
 	struct foo {
 		ubyte a;

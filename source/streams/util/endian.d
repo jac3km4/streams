@@ -20,7 +20,7 @@ private {
  * 
  * Returns: Scalar value with reversed bytes.
  */
-static @nogc T swapEndianScalar(T)(T t) pure nothrow if(isScalar!T) {
+static @nogc T swapEndianScalar(T)(T t) pure nothrow if(isScalarType!T) {
 	auto dst = cast(ubyte*)&t;
 	for(int i = 0, j = T.sizeof - 1; i < T.sizeof/2; ++i, --j) {
 		auto tmp = dst[i];
