@@ -1,0 +1,8 @@
+MODULES =
+	$(MODULE streams.data)
+	$(MODULE streams.memory)
+	$(MODULE streams.zlib)
+	$(MODULE streams.archive.zip)
+	$(MODULE streams.util.endian)
+	$(MODULE streams.util.traits)
+	$(MODULE streams.util.wrappers)
