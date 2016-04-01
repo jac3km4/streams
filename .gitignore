@@ -1,0 +1,24 @@
+.# Created by https://www.gitignore.io/api/d
+
+### D ###
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+
+# DUB
+docs/*
+.dub
+docs.json
+__dummy.html

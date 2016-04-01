@@ -1,0 +1,7 @@
+name "streams"
+description "IO streams library."
+copyright "Copyright © 2016, Jacek Malec"
+authors "Jacek Malec"
+license "MIT"
+dependency "io" version="~master"
+targetType "library"

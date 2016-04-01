@@ -1,0 +1,13 @@
+﻿<Properties StartupItem="dub.sdl">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="dub.sdl">
+    <Files>
+      <File FileName="source/streams/archive/zip.d" Line="46" Column="1" />
+      <File FileName="dub.sdl" Line="7" Column="21" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

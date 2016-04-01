@@ -1,0 +1,128 @@
+﻿/**
+ * Copyright: Copyright Jacek Malec, 2016
+ * License:   MIT
+ * Authors:   Jacek Malec
+ *
+ * Description:
+ * This module contains methods which
+ * allow manipulating binary data in streams.
+ */
+module streams.data;
+private {
+	import std.system: Endian, endian;
+	import std.traits;
+
+	import io.stream;
+
+	import streams.util.endian;
+	import streams.util.traits: isDirectSource;
+}
+
+private enum doesNeedSwap(Endian e, T) = T.sizeof > 1 && endian != e;
+
+/**
+ * Decodes a primitive value from a source
+ * taking care of endianess.
+ * 
+ * Params:
+ * 	source = Stream to read from.
+ */
+static T decode(T, Endian e = Endian.littleEndian, Source)(auto ref Source source) if (isSource!Source && isScalarType!T) {
+	static if(isDirectSource!Source) {
+		auto slice = source.read(T.sizeof);
+		if(slice.length != T.sizeof)
+			throw new ReadException("Failed to read enough bytes");
+		auto deref = *cast(T*)slice;
+		alias t = deref;
+	} else {
+		T t;
+		auto ptr = (cast(ubyte*)&t)[0..T.sizeof];
+		if(source.read(ptr) != T.sizeof)
+			throw new ReadException("Failed to read enough bytes");
+	}
+	static if(doesNeedSwap!(e, T))
+		return swapEndianScalar(t);
+	else
+		return t;
+}
+
+/**
+ * Encodes a primitive value into a sink
+ * taking care of endianess.
+ * 
+ * Params:
+ * 	sink = Stream to write into.
+ * 	t = Value to encode.
+ */
+static void encode(Endian e = Endian.littleEndian, T, Sink)(auto ref Sink sink, T t) if (isSink!Sink && isScalarType!T) {
+	static if(doesNeedSwap!(e, T)) {
+		T x = swapEndianScalar(t);
+		alias src = x;
+	}
+	else alias src = t;
+	auto ptr = (cast(ubyte*)&src)[0..T.sizeof];
+	if(sink.write(ptr) != T.sizeof)
+		throw new WriteException("Failed to write enough bytes");
+}
+
+/**
+ * Interprets bytes from source as a structure
+ * taking care of endianess of it's members.
+ * 
+ * Params:
+ * 	source = Stream to read from.
+ */
+static Struct rawRead(Struct, Endian e = Endian.littleEndian, Source)(auto ref Source source) if(isSource!Source && is(Struct == struct)) {
+	static if(isDirectSource!Source) {
+		auto slice = source.read(Struct.sizeof);
+		if(slice.length != Struct.sizeof)
+			throw new ReadException("Failed to read enough bytes");
+		auto s = *cast(Struct*)slice;
+		alias res = s;
+	} else {
+		Struct s;
+		auto ptr = (cast(ubyte*)&s)[0..Struct.sizeof];
+		if(source.read(ptr) != Struct.sizeof)
+			throw new ReadException("Failed to read enough bytes");
+		alias res = s;
+	}
+	static if(endian != e)
+		swapEndianStruct(res);
+	return res;
+}
+
+/**
+ * Encodes a structure as a sequence of bytes
+ * taking care of endianess of it's members.
+ * 
+ * Params:
+ * 	sink = Stream to write into.
+ * 	s = Structure to encode.
+ */
+static void rawWrite(Endian e = Endian.littleEndian, Struct, Sink)(auto ref Sink sink, in Struct s) if(isSink!Sink && is(Struct == struct)) {
+	static if(endian != e) {
+		scope auto copy = s;
+		swapEndianStruct(copy);
+		alias src = copy;
+	} else {
+		alias src = s; 
+	}
+	auto ptr = (cast(ubyte*)&src)[0..Struct.sizeof];
+	if(sink.write(ptr) != Struct.sizeof)
+		throw new WriteException("Failed to write enough bytes");
+}
+
+unittest {
+	import io.streams.memory;
+
+	struct foo {
+		ubyte a;
+		short b;
+	}
+
+	immutable (ubyte[]) data = [11, 0, 99, 0];
+	auto s = memoryStream(data);
+	assert(s.rawRead!foo == foo(11, 99));
+	s.seekTo(0, From.start);
+	assert(s.decode!ubyte == 11);
+}
