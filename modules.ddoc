@@ -2,6 +2,7 @@ MODULES =
 	$(MODULE streams.package)
 	$(MODULE streams.data)
 	$(MODULE streams.memory)
+	$(MODULE streams.slice)
 	$(MODULE streams.zlib)
 	$(MODULE streams.archive.zip)
 	$(MODULE streams.util.endian)

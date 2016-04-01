@@ -61,6 +61,7 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.package.html" title="streams.package"><i class="icon-th"></i>streams.package</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.data.html" title="streams.data"><i class="icon-th"></i>streams.data</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.memory.html" title="streams.memory"><i class="icon-th"></i>streams.memory</a></li>
+	<li class="sidebar-list-entry tree-leaf"><a href="streams.slice.html" title="streams.slice"><i class="icon-th"></i>streams.slice</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.zlib.html" title="streams.zlib"><i class="icon-th"></i>streams.zlib</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.archive.zip.html" title="streams.archive.zip"><i class="icon-th"></i>streams.archive.zip</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.endian.html" title="streams.util.endian"><i class="icon-th"></i>streams.util.endian</a></li>
@@ -103,6 +104,7 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.package.html" title="streams.package"><i class="icon-th"></i>streams.package</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.data.html" title="streams.data"><i class="icon-th"></i>streams.data</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.memory.html" title="streams.memory"><i class="icon-th"></i>streams.memory</a></li>
+	<li class="sidebar-list-entry tree-leaf"><a href="streams.slice.html" title="streams.slice"><i class="icon-th"></i>streams.slice</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.zlib.html" title="streams.zlib"><i class="icon-th"></i>streams.zlib</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.archive.zip.html" title="streams.archive.zip"><i class="icon-th"></i>streams.archive.zip</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.endian.html" title="streams.util.endian"><i class="icon-th"></i>streams.util.endian</a></li>
@@ -138,7 +140,7 @@ This module enables you to treat
 </dl>
 <hr><div class="row-fluid declaration"><h3>static pure nothrow @nogc @safe auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(immutable(ubyte)[] <i>data</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Creates a read-only memory stream from an array.
+<div class="declaration-content"><dl><p>Creates a read-only memory stream from a byte array.
 </p>
 <dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>immutable(ubyte)[] <i>data</i></td>
 <td>Immutable byte array.</td></tr>
@@ -147,7 +149,7 @@ This module enables you to treat
 </div>
 <hr><div class="row-fluid declaration"><h3>static pure nothrow @safe auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(ubyte[] <i>data</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Creates a memory stream based on an array.
+<div class="declaration-content"><dl><p>Creates a memory stream based on a byte array.
 </p>
 <dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>data</i></td>
 <td>Byte array.</td></tr>
@@ -182,15 +184,122 @@ This module enables you to treat
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ReadOnlyMemoryStreamBase">&nbsp;</span><a class="symbol-link" href="#ReadOnlyMemoryStreamBase">ReadOnlyMemoryStreamBase</a>;
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ReadOnlyMemoryStream">&nbsp;</span><a class="symbol-link" href="#ReadOnlyMemoryStream">ReadOnlyMemoryStream</a>;
 </h3></div>
 <div class="declaration-content"><dl><p>A read-only memory stream.</p>
 </dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @safe this(immutable(ubyte)[] <i>data</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Creates a read-only memory stream from a byte array.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>immutable(ubyte)[] <i>data</i></td>
+<td>Immutable byte array.</td></tr>
+</table></dd>
+</dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="MemoryStreamBase">&nbsp;</span><a class="symbol-link" href="#MemoryStreamBase">MemoryStreamBase</a>;
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @safe size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>buf</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Reads bytes into the specified buffer.
+ The number of bytes <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> is returned.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @safe const(ubyte[]) <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(size_t <i>size</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Provides a direct access to a number of bytes.
+ If remaining bytes is less than <i>size</i>, then a
+ smaller slice is returned.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>long <span class="symbol-target" id="seekTo">&nbsp;</span><a class="symbol-link" href="#seekTo">seekTo</a>(long <i>offset</i>, From <i>from</i> = From.start);
+</h3></div>
+<div class="declaration-content"><dl><p>Seeks relative to a position.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>long <i>offset</i></td>
+<td>Offset relative to a reference point.</td></tr>
+<tr><td>From <i>from</i></td>
+<td>Optional reference point.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe immutable(ubyte[]) <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns the underlying buffer.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe immutable(ubyte[]) <span class="symbol-target" id="opSlice">&nbsp;</span><a class="symbol-link" href="#opSlice">opSlice</a>(size_t <i>i</i>, size_t <i>j</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Returns a slice of the underlying buffer.</p>
+</dl>
+</div>
+</div>
+</div>
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="MemoryStream">&nbsp;</span><a class="symbol-link" href="#MemoryStream">MemoryStream</a>;
 </h3></div>
 <div class="declaration-content"><dl><p>A mutable memory stream.</p>
 </dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>pure nothrow @safe this(ubyte[] <i>data</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Creates a memory stream based on a byte array.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>data</i></td>
+<td>Byte array.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @safe this(size_t <i>size</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Creates a memory stream reserving specified amount of memory.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>size_t <i>size</i></td>
+<td>Amount of bytes to preallocate.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @safe size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>buf</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Reads bytes into the specified buffer.
+ The number of bytes <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> is returned.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @safe const(ubyte[]) <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(size_t <i>size</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Provides a direct access to a number of bytes.
+ If remaining bytes is less than <i>size</i>, then a
+ smaller slice is returned.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @safe size_t <span class="symbol-target" id="write">&nbsp;</span><a class="symbol-link" href="#write">write</a>(in ubyte[] <i>data</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Appends <i>data</i> to the buffer.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>data</i></td>
+<td>Byte array to be appended.</td></tr>
+</table></dd>
+<dt>Returns</dt><dd>The number of bytes that were appended.</dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>long <span class="symbol-target" id="seekTo">&nbsp;</span><a class="symbol-link" href="#seekTo">seekTo</a>(long <i>offset</i>, From <i>from</i> = From.start);
+</h3></div>
+<div class="declaration-content"><dl><p>Seeks relative to a position.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>long <i>offset</i></td>
+<td>Offset relative to a reference point.</td></tr>
+<tr><td>From <i>from</i></td>
+<td>Optional reference point.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte)[] <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns the underlying buffer.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte[]) <span class="symbol-target" id="opSlice">&nbsp;</span><a class="symbol-link" href="#opSlice">opSlice</a>(size_t <i>i</i>, size_t <i>j</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Returns a slice of the underlying buffer.</p>
+</dl>
+</div>
+</div>
 </div>
 
 

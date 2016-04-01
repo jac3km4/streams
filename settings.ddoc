@@ -5,7 +5,6 @@ TITLEBARTEXT = <a href="https://github.com/jac3km4/streams">Github Page</a>
 RESOURCEROOT = bootDoc/
 DEFAULTPACKAGE = streams
 ISSUETRACKER = https://github.com/jac3km4/streams/issues/$1
-DEFAULTPACKAGE = example
 PACKAGESEP = .
 FAVICON = $(RESOURCEROOT)assets/ico/favicon.ico
 LOGOSRC = $(RESOURCEROOT)assets/img/icon-github.png
