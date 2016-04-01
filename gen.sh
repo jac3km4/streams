@@ -1,0 +1,1 @@
+rdmd bootDoc/generate.d ../source -I~/.dub/packages/io-master/source --extra=index.d

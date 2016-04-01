@@ -1,4 +1,5 @@
 MODULES =
+	$(MODULE streams.package)
 	$(MODULE streams.data)
 	$(MODULE streams.memory)
 	$(MODULE streams.zlib)

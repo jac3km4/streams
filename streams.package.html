@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 	<meta charset="utf-8">
-	<title>streams.zlib - streams documentation</title>
+	<title>streams - streams documentation</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -34,7 +34,7 @@
 	
 	<!-- Introduce DDoc settings required by JavaScript -->
 	<script type="text/javascript">
-		var Title = 'streams.zlib';
+		var Title = 'streams';
 		var SourceRepository = 'https://github.com/jac3km4/streams/tree/master';
 		var PackageSeparator = '.';
 	</script>
@@ -83,7 +83,7 @@
 					</ul>
 					
 					<form id="gotosymbol" class="navbar-search pull-left hidden">
-						<input type="text" class="search-query" placeholder="Go to symbol in streams.zlib" data-provide="typeahead" data-items="4">
+						<input type="text" class="search-query" placeholder="Go to symbol in streams" data-provide="typeahead" data-items="4">
 					</form>
 					
 					<p class="navbar-text pull-right"><a href="https://github.com/jac3km4/streams">Github Page</a></p>
@@ -109,7 +109,7 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.traits.html" title="streams.util.traits"><i class="icon-th"></i>streams.util.traits</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.wrappers.html" title="streams.util.wrappers"><i class="icon-th"></i>streams.util.wrappers</a></li>
 					</noscript>
-					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams.zlib</li>
+					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams</li>
 				</ul>
 				</div><!--/.well -->
 			</div><!--/span-->
@@ -118,7 +118,7 @@
 				<div class="row-fluid">
 					<div class="span11">
 						<ul id="module-breadcrumb" class="breadcrumb">
-							<noscript><h1>streams.zlib</h1></noscript>
+							<noscript><h1>streams</h1></noscript>
 						</ul>
 						
 					</div>
@@ -133,61 +133,45 @@
 
 </dd>
 <dt>Description:</dt><dd>
-This module provides an interface to read and write Zlib streams</dd>
+</dd>
 </dl>
-<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zlibStream">&nbsp;</span><a class="symbol-link" href="#zlibStream">zlibStream</a>(Stream)(auto ref Stream <i>stream</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT) if (isStream!Stream);
+<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="fileStream">&nbsp;</span><a class="symbol-link" href="#fileStream">fileStream</a>(string <i>path</i>, FileFlags <i>flags</i> = FileFlags.readExisting);
 </h3></div>
-<div class="declaration-content"><dl><p>Creates a Zlib <i>stream</i>.
-</p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
-<td>Base <i>stream</i>.</td></tr>
-<tr><td>Encoding <i>encoding</i></td>
-<td>Encoding to use.</td></tr>
-<tr><td>int <i>windowBits</i></td>
-<td>Window bits.</td></tr>
-</table></dd>
-</dl>
-</div>
-<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="zlibStream">&nbsp;</span><a class="symbol-link" href="#zlibStream">zlibStream</a>(in string <i>path</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT);
-</h3></div>
-<div class="declaration-content"><dl><p>Open a file as a Zlib stream.
+<div class="declaration-content"><dl><p>Convenience function. Opens a file with buffering with specified <i>flags</i>.
 </p>
 <dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>string <i>path</i></td>
-<td>File <i>path</i>.</td></tr>
-<tr><td>Encoding <i>encoding</i></td>
-<td>Encoding to use.</td></tr>
-<tr><td>int <i>windowBits</i></td>
-<td>Window bits.</td></tr>
+<td>Path to the file.</td></tr>
+<tr><td>FileFlags <i>flags</i></td>
+<td>File <i>flags</i>.</td></tr>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ZlibStreamBase">&nbsp;</span><a class="symbol-link" href="#ZlibStreamBase">ZlibStreamBase</a>(Stream) if (isStream!Stream);
+<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="unbufferedFileStream">&nbsp;</span><a class="symbol-link" href="#unbufferedFileStream">unbufferedFileStream</a>(string <i>path</i>, FileFlags <i>flags</i> = FileFlags.readExisting);
 </h3></div>
-<div class="declaration-content"><dl><p>Zlib stream structure</p>
-</dl>
-<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Stream <i>stream</i>, Encoding <i>encoding</i>, int <i>windowBits</i>);
-</h3></div>
-<div class="declaration-content"><dl><p>Creates a Zlib <i>stream</i>.
+<div class="declaration-content"><dl><p>Convenience function. Opens a file without buffering with specified <i>flags</i>.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
-<td>Base <i>stream</i>.</td></tr>
-<tr><td>Encoding <i>encoding</i></td>
-<td>Encoding to use.</td></tr>
-<tr><td>int <i>windowBits</i></td>
-<td>Window bits.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>string <i>path</i></td>
+<td>Path to the file.</td></tr>
+<tr><td>FileFlags <i>flags</i></td>
+<td>File <i>flags</i>.</td></tr>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>chunk</i>);
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="copyTo">&nbsp;</span><a class="symbol-link" href="#copyTo">copyTo</a>(Source, Sink)(auto ref Source <i>source</i>, auto ref Sink <i>sink</i>, size_t <i>upTo</i> = -1, size_t <i>bufferSize</i> = 64 * 1024) if (isSource!Source &amp;&amp; isSink!Sink);
 </h3></div>
-<div class="declaration-content"><dl><p>Reads and decodes bytes from a base stream.
+<div class="declaration-content"><dl><p>Reads a certain amount of bytes from a <i>source</i>
+ and writes them into a <i>sink</i>.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>chunk</i></td>
-<td>Byte buffer to <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> into.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Source <i>source</i></td>
+<td>Stream to read bytes from.</td></tr>
+<tr><td>Sink <i>sink</i></td>
+<td>Stream to write into.</td></tr>
+<tr><td>size_t <i>upTo</i></td>
+<td>Maximum number of bytes to copy (all if -1).</td></tr>
+<tr><td>size_t <i>bufferSize</i></td>
+<td>The size of memory buffer to use.</td></tr>
 </table></dd>
 </dl>
-</div>
-</div>
 </div>
 
 
