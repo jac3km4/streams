@@ -17,6 +17,7 @@ private {
 	import streams.data;
 	import streams.memory;
 	import streams.zlib;
+	import streams.slice;
 	import streams.util.wrappers;
 }
 
@@ -225,41 +226,5 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream) {
 			default:
 				throw new ZipException("Unexpected compression method");
 		}
-	}
-}
-
-private auto sliceStream(Stream)(auto ref Stream s, size_t st, size_t len) if (isSource!Stream) {
-	return new SliceStream!Stream(s, st, len);
-}
-
-struct SliceStream(Stream) if (isSource!Stream) {
-	Stream base;
-	private size_t start, length, position = 0;
-
-	@disable long seekTo(long, From);
-
-	this(auto ref Stream stream, size_t st, size_t len) {
-		base = stream;
-		start = st;
-		length = len;
-	}
-
-	size_t read(ubyte[] buf) {
-		if(position >= length)
-			return 0;
-		size_t len = buf.length;
-		if(position + buf.length > length)
-			len = length - position;
-		if(base.position != start + position)
-			base.seekTo(position);
-		auto read = base.read(buf[0..len]);
-		position += read;
-		return read;
-	}
-}
-
-class ZipException : Exception {
-	this(in string msg) {
-		super(msg);
 	}
 }
