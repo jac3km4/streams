@@ -228,7 +228,7 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream) {
 	}
 }
 
-private auto sliceStream(Stream)(Stream s, size_t st, size_t len) if (isSource!Stream) {
+private auto sliceStream(Stream)(auto ref Stream s, size_t st, size_t len) if (isSource!Stream) {
 	return new SliceStream!Stream(s, st, len);
 }
 
@@ -238,7 +238,7 @@ struct SliceStream(Stream) if (isSource!Stream) {
 
 	@disable long seekTo(long, From);
 
-	this(Stream stream, size_t st, size_t len) {
+	this(auto ref Stream stream, size_t st, size_t len) {
 		base = stream;
 		start = st;
 		length = len;

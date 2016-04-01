@@ -18,7 +18,8 @@
 *.exe
 
 # DUB
-docs/*
+docs/
+gh-pages/
 .dub
 docs.json
 __dummy.html
