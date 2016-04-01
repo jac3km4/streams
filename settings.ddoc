@@ -1,6 +1,6 @@
 PROJECTNAME = streams
 REFERENCETOP = index.html
-REPOSRCTREE = https://github.com/jac3km4/streams/tree/master
+REPOSRCTREE = https://github.com/jac3km4/streams/tree/master/source
 TITLEBARTEXT = <a href="https://github.com/jac3km4/streams">Github Page</a>
 RESOURCEROOT = bootDoc/
 DEFAULTPACKAGE = streams
