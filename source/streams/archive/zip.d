@@ -228,3 +228,9 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream) {
 		}
 	}
 }
+
+class ZipException: Exception {
+	@nogc @safe this(in string msg) pure nothrow {
+		super(msg);
+	}
+} 
