@@ -53,7 +53,8 @@ struct SliceStreamBase(Source) if (isSource!Source) {
 	}
 
 	/**
-	 * Reads bytes into the specified buffer.
+	 * Reads bytes into the specified buffer
+	 * from the underlying stream.
 	 * The number of bytes read is returned.
 	 */
 	size_t read(ubyte[] buf) {
@@ -71,7 +72,8 @@ struct SliceStreamBase(Source) if (isSource!Source) {
 
 	static if (isDirectSource!Source) {
 		/**
-		 * Provides a direct access to a number of bytes.
+		 * Provides a direct access to a number of bytes
+		 * of the underlying stream (if it allows such operation).
 		 * If remaining bytes is less than size, then a
 		 * smaller slice is returned.
 		 */
