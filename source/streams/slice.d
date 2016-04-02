@@ -32,6 +32,8 @@ struct SliceStreamBase(Source) if (isSource!Source) {
 	Source base;
 	private size_t _start, _length, _position = 0;
 
+	@disable this(this);
+
 	/**
 	 * Creates a new slice stream based on the given source.
 	 * 
