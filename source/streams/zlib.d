@@ -12,7 +12,7 @@ private {
 
 	import io.stream;
 
-	import streams.util.traits: isDirectSource;
+	import streams.util.direct;
 }
 
 private enum WINDOW_BITS_DEFAULT = 15;
@@ -132,7 +132,7 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 				return 0;
 			if(zStream.avail_in == 0) {
 				static if(isDirect) {
-					auto slice = base.read(ZLIB_BUFFER_SIZE);
+					auto slice = base.directRead(ZLIB_BUFFER_SIZE);
 					if(slice.length == 0)
 						return 0;
 					zStream.avail_in = to!uint(slice.length);
@@ -195,6 +195,7 @@ class ZlibException: Exception {
 
 import std.typecons;
 import io.buffer: FixedBuffer;
+
 template StreamType(Stream) {
 	static if(isDirectSource!Stream)
 		alias type = ZlibStreamBase!Stream;

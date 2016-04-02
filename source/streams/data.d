@@ -9,13 +9,14 @@
  */
 module streams.data;
 private {
+	import std.conv: to;
 	import std.system: Endian, endian;
 	import std.traits;
 
 	import io.stream;
 
 	import streams.util.endian;
-	import streams.util.traits: isDirectSource;
+	import streams.util.direct;
 }
 
 private enum doesNeedSwap(Endian e, T) = T.sizeof > 1 && endian != e;
@@ -29,7 +30,7 @@ private enum doesNeedSwap(Endian e, T) = T.sizeof > 1 && endian != e;
  */
 static T decode(T, Endian e = Endian.littleEndian, Source)(auto ref Source source) if (isSource!Source && isScalarType!T) {
 	static if(isDirectSource!Source) {
-		auto slice = source.read(T.sizeof);
+		auto slice = source.directRead(T.sizeof);
 		if(slice.length != T.sizeof)
 			throw new ReadException("Failed to read enough bytes");
 		auto deref = *cast(T*)slice;
@@ -74,7 +75,7 @@ static void encode(Endian e = Endian.littleEndian, T, Sink)(auto ref Sink sink, 
  */
 static Struct rawRead(Struct, Endian e = Endian.littleEndian, Source)(auto ref Source source) if(isSource!Source && is(Struct == struct)) {
 	static if(isDirectSource!Source) {
-		auto slice = source.read(Struct.sizeof);
+		auto slice = source.directRead(Struct.sizeof);
 		if(slice.length != Struct.sizeof)
 			throw new ReadException("Failed to read enough bytes");
 		auto s = *cast(Struct*)slice;

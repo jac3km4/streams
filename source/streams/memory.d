@@ -56,7 +56,7 @@ static @nogc @safe auto memoryStream() pure nothrow {
 /**
  * Copies a certain amount of bytes from a stream
  * and returns them as a read-only memory stream.
- * 
+ *
  * Params:
  * 	source = Stream to copy bytes from.
  * 	upTo = Maximum number of bytes to copy (all if -1).
@@ -66,24 +66,33 @@ static auto copyToMemory(Source)(
 	auto ref Source source,
 	size_t upTo = -1,
 	size_t bufferSize = 64 * 1024) if (isSource!Source) {
-	static if(isSeekable!Source) {
-		auto buf = source.readAll(upTo);
+	import streams.util.direct;
+
+	static if(isDirectSource!Source) {
+		auto buf = source.directReadAll(upTo).idup;
+		alias bytes = buf;
+	}
+	else static if(isSeekable!Source) {
+		ubyte[] buf;
+		if(upTo == -1)
+			buf = source.readAll();
+		else buf = cast(immutable(ubyte)[])source.readAll(upTo);
 		alias bytes = buf;
 	} else {
 		auto mem = memoryStream();
 		source.copyTo(mem, upTo, bufferSize);
-		auto buf = mem.data;
+		auto buf = cast(immutable(ubyte)[])mem.data;
 		alias bytes = buf;
 	}
-	return memoryStream(cast(immutable(ubyte)[])bytes);
+	return memoryStream(bytes);
 }
 
 /**
  * A read-only memory stream.
  */
 struct ReadOnlyMemoryStream {
-	private size_t position = 0;
-	private immutable (ubyte)[] buffer;
+	private size_t _position = 0;
+	private immutable (ubyte)[] _buffer;
 
 	/**
 	 * Creates a read-only memory stream from a byte array.
@@ -92,7 +101,7 @@ struct ReadOnlyMemoryStream {
 	 * 	data = Immutable byte array.
 	 */
 	@nogc @safe this(immutable(ubyte)[] data) pure nothrow {
-		buffer = data;
+		_buffer = data;
 	}
 
 	/**
@@ -100,36 +109,30 @@ struct ReadOnlyMemoryStream {
 	 * The number of bytes read is returned.
 	 */
 	@nogc @safe size_t read(ubyte[] buf) pure nothrow {
-		auto remaining = buffer.length - position;
+		auto remaining = _buffer.length - _position;
 		if(remaining == 0)
 			return 0;
 		size_t len;
 		if(remaining < buf.length)
 			len = remaining;
 		else len = buf.length;
-		auto end = position + len;
-		buf[0..len] = buffer[position..end];
-		position = end;
+		auto end = _position + len;
+		buf[0..len] = _buffer[_position..end];
+		_position = end;
 		return len;
 	}
 
 	/**
-	 * Provides a direct access to a number of bytes.
-	 * If remaining bytes is less than size, then a
-	 * smaller slice is returned.
+	 * Returns a slice of the underlying buffer.
 	 */
-	@nogc @safe const(ubyte[]) read(size_t size) pure nothrow {
-		auto remaining = buffer.length - position;
-		if(remaining == 0)
-			return [];
-		size_t len;
-		if(remaining < size)
-			len = remaining;
-		else len = size;
-		auto end = position + len;
-		auto slice = buffer[position..end];
-		position = end;
-		return slice;
+	@nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow {
+		return _buffer[i..j];
+	}
+	/**
+	 * Returns length of the underlying buffer.
+	 */
+	@nogc @safe @property size_t opDollar(size_t dim: 0)() pure nothrow {
+		return length;
 	}
 
 	/**
@@ -142,35 +145,49 @@ struct ReadOnlyMemoryStream {
 	long seekTo(long offset, From from = From.start) {
 		switch(from) {
 			case From.start:
-				position = offset;
+				_position = offset;
 				break;
 			case From.here:
-				position += offset;
+				_position += offset;
 				break;
 			case From.end:
-				position = buffer.length + offset;
+				_position = _buffer.length + offset;
 				break;
 			default:
 		}
-		if(position >= buffer.length)
+		if(_position >= _buffer.length)
 			throw new SeekException("Can't seek past the buffer");
-		else if (position < 0)
+		else if (_position < 0)
 			throw new SeekException("Position can't be negative");
-		return position;
+		return _position;
 	}
 
 	/**
 	 * Returns the underlying buffer.
 	 */
 	@nogc @safe @property immutable(ubyte[]) data() pure nothrow {
-		return buffer;
+		return _buffer;
 	}
 
 	/**
-	 * Returns a slice of the underlying buffer.
+	 * Returns length of the underlying buffer.
 	 */
-	@nogc @safe @property immutable(ubyte[]) opSlice(size_t i, size_t j) pure nothrow {
-		return buffer[i..j];
+	@nogc @safe @property size_t length() pure nothrow {
+		return _buffer.length;
+	}
+
+	/**
+	 * Returns current position in the stream.
+	 */
+	@nogc @safe @property size_t position() pure nothrow {
+		return _position;
+	}
+
+	/**
+	 * Sets position in the stream.
+	 */
+	@nogc @safe @property void position(size_t pos) pure nothrow {
+		_position = pos;
 	}
 }
 
@@ -178,8 +195,8 @@ struct ReadOnlyMemoryStream {
  * A mutable memory stream.
  */
 struct MemoryStream {
-	private size_t position = 0;
-	private Appender!(ubyte[]) buffer;
+	private size_t _position = 0;
+	private Appender!(ubyte[]) _buffer;
 
 	/**
 	 * Creates a memory stream based on a byte array.
@@ -188,7 +205,7 @@ struct MemoryStream {
 	 * 	data = Byte array.
 	 */
 	@safe this(ubyte[] data) pure nothrow {
-		buffer = appender(data);
+		_buffer = appender(data);
 	}
 
 	/**
@@ -198,7 +215,7 @@ struct MemoryStream {
 	 * 	size = Amount of bytes to preallocate.
 	 */
 	@safe this(size_t size) pure nothrow {
-		buffer.reserve(size);
+		_buffer.reserve(size);
 	}
 
 	/**
@@ -206,38 +223,18 @@ struct MemoryStream {
 	 * The number of bytes read is returned.
 	 */
 	@nogc @safe size_t read(ubyte[] buf) pure nothrow {
-		auto data = buffer.data;
-		auto remaining = data.length - position;
+		auto data = _buffer.data;
+		auto remaining = data.length - _position;
 		if(remaining == 0)
 			return 0;
 		size_t len;
 		if(remaining < buf.length)
 			len = remaining;
 		else len = buf.length;
-		auto end = position + len;
-		buf[0..len] = data[position..end];
-		position = end;
+		auto end = _position + len;
+		buf[0..len] = data[_position..end];
+		_position = end;
 		return len;
-	}
-
-	/**
-	 * Provides a direct access to a number of bytes.
-	 * If remaining bytes is less than size, then a
-	 * smaller slice is returned.
-	 */
-	@nogc @safe const(ubyte[]) read(size_t size) pure nothrow {
-		auto data = buffer.data;
-		auto remaining = data.length - position;
-		if(remaining == 0)
-			return [];
-		size_t len;
-		if(remaining < size)
-			len = remaining;
-		else len = size;
-		auto end = position + len;
-		auto slice = data[position..end];
-		position = end;
-		return slice;
 	}
 
 	/**
@@ -249,8 +246,8 @@ struct MemoryStream {
 	 * Returns: The number of bytes that were appended.
 	 */
 	@safe size_t write(in ubyte[] data) pure nothrow {
-		buffer ~= data;
-		position += data.length;
+		_buffer ~= data;
+		_position += data.length;
 		return data.length;
 	}
 
@@ -262,37 +259,64 @@ struct MemoryStream {
 	 *   from   = Optional reference point.
 	 */
 	long seekTo(long offset, From from = From.start) {
-		auto data = buffer.data;
+		auto data = _buffer.data;
 		switch(from) {
 			case From.start:
-				position = offset;
+				_position = offset;
 				break;
 			case From.here:
-				position += offset;
+				_position += offset;
 				break;
 			case From.end:
-				position = data.length + offset;
+				_position = data.length + offset;
 				break;
 			default:
 		}
-		if(position >= data.length)
+		if(_position >= data.length)
 			throw new SeekException("Can't seek past the buffer");
-		else if (position < 0)
+		else if (_position < 0)
 			throw new SeekException("Position can't be negative");
-		return position;
+		return _position;
 	}
 
 	/**
 	 * Returns the underlying buffer.
 	 */
 	@nogc @safe @property const(ubyte)[] data() pure nothrow {
-		return buffer.data;
+		return _buffer.data;
 	}
 
 	/**
 	 * Returns a slice of the underlying buffer.
 	 */
 	@nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow {
-		return buffer.data[i..j];
+		return _buffer.data[i..j];
+	}
+	/**
+	 * Returns length of the underlying buffer.
+	 */
+	@nogc @safe @property size_t opDollar(size_t dim: 0)() pure nothrow {
+		return length;
+	}
+
+	/**
+	 * Returns length of the underlying buffer.
+	 */
+	@nogc @safe @property size_t length() pure nothrow {
+		return _buffer.data.length;
+	}
+
+	/**
+	 * Returns current position in the stream.
+	 */
+	@nogc @safe @property size_t position() pure nothrow {
+		return _position;
+	}
+
+	/**
+	 * Sets position in the stream.
+	 */
+	@nogc @safe @property void position(size_t pos) pure nothrow {
+		_position = pos;
 	}
 }

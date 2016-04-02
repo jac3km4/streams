@@ -50,21 +50,36 @@ static void copyTo(Source, Sink)(
 	size_t upTo = -1,
 	size_t bufferSize = 64 * 1024) if (isSource!Source && isSink!Sink) {
 	import std.array: uninitializedArray;
+	import streams.util.direct;
 
-	auto buffer = uninitializedArray!(ubyte[])(bufferSize);
-	if(upTo != -1) {
-		size_t count = 0;
-		while(count < upTo) {
-			size_t read = source.read(buffer);
-			if(read == 0) break;
-			count += read;
-			sink.write(buffer[0..read]);
-		}
+	static if(isDirectSource!Source) {
+		sink.write(source.directReadAll(upTo));
 	} else {
-		while(true) {
-			size_t read = source.read(buffer);
-			if(read == 0) break;
-			sink.write(buffer[0..read]);
+		auto buffer = uninitializedArray!(ubyte[])(bufferSize);
+		if(upTo != -1) {
+			size_t count = 0;
+			while(count < upTo) {
+				size_t read = source.read(buffer);
+				if(read == 0) break;
+				count += read;
+				sink.write(buffer[0..read]);
+			}
+		} else {
+			while(true) {
+				size_t read = source.read(buffer);
+				if(read == 0) break;
+				sink.write(buffer[0..read]);
+			}
 		}
 	}
+}
+
+unittest {
+	import streams.memory;
+
+	immutable(ubyte[]) raw = [1, 2, 3, 4, 5, 6];
+	auto mem1 = memoryStream(raw);
+	auto mem2 = memoryStream();
+	mem1.copyTo(mem2);
+	assert(mem1.data[] == mem2.data[]);
 }
