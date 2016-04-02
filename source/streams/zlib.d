@@ -58,11 +58,11 @@ static auto zlibStream(
  * Zlib stream structure
  */
 struct ZlibStreamBase(Stream) if (isStream!Stream) {
-	private enum isDirect = isDirectSource!Stream;
+	private enum _isDirect = isDirectSource!Stream;
 	Stream base;
 
-	static if(!isDirect)
-		private ubyte[] buffer;
+	static if(!_isDirect)
+		private ubyte[] _buffer;
 	private z_stream _zStream;
 	private bool _init = false;
 
@@ -109,8 +109,8 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 		auto res = inflateInit2(&_zStream, windowBits);
 		if(res != Z_OK)
 			throw new ZlibException(res);
-		static if(!isDirect)
-			buffer = new ubyte[ZLIB_BUFFER_SIZE];
+		static if(!_isDirect)
+			_buffer = new ubyte[ZLIB_BUFFER_SIZE];
 		_init = true;
 	}
 
@@ -131,18 +131,18 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 			if(!_init)
 				return 0;
 			if(_zStream.avail_in == 0) {
-				static if(isDirect) {
+				static if(_isDirect) {
 					auto slice = base.directRead(ZLIB_BUFFER_SIZE);
 					if(slice.length == 0)
 						return 0;
 					_zStream.avail_in = to!uint(slice.length);
 					_zStream.next_in = slice.ptr;
 				} else {
-					auto len = base.read(buffer);
+					auto len = base.read(_buffer);
 					if(len == 0)
 						return 0;
 					_zStream.avail_in = to!uint(len);
-					_zStream.next_in = buffer.ptr;
+					_zStream.next_in = _buffer.ptr;
 				}
 			}
 			_zStream.avail_out = to!uint(chunk.length);
@@ -198,7 +198,7 @@ import io.buffer: FixedBuffer;
 
 template StreamType(Stream) {
 	static if(isDirectSource!Stream)
-		alias type = ZlibStreamBase!Stream;
+		alias type = RefCounted!(ZlibStreamBase!Stream, RefCountedAutoInitialize.no);
 	else
 		alias type = RefCounted!(FixedBuffer!(ZlibStreamBase!Stream), RefCountedAutoInitialize.no);
 }

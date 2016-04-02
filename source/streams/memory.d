@@ -123,19 +123,6 @@ struct ReadOnlyMemoryStream {
 	}
 
 	/**
-	 * Returns a slice of the underlying buffer.
-	 */
-	@nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow {
-		return _buffer[i..j];
-	}
-	/**
-	 * Returns length of the underlying buffer.
-	 */
-	@nogc @safe @property size_t opDollar(size_t dim: 0)() pure nothrow {
-		return length;
-	}
-
-	/**
 	 * Seeks relative to a position.
 	 *
 	 * Params:
@@ -160,6 +147,19 @@ struct ReadOnlyMemoryStream {
 		else if (_position < 0)
 			throw new SeekException("Position can't be negative");
 		return _position;
+	}
+
+	/**
+	 * Returns a slice of the underlying buffer.
+	 */
+	@nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow {
+		return _buffer[i..j];
+	}
+	/**
+	 * Returns length of the underlying buffer.
+	 */
+	@nogc @safe @property size_t opDollar(size_t dim: 0)() pure nothrow {
+		return length;
 	}
 
 	/**
@@ -280,13 +280,6 @@ struct MemoryStream {
 	}
 
 	/**
-	 * Returns the underlying buffer.
-	 */
-	@nogc @safe @property const(ubyte)[] data() pure nothrow {
-		return _buffer.data;
-	}
-
-	/**
 	 * Returns a slice of the underlying buffer.
 	 */
 	@nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow {
@@ -297,6 +290,13 @@ struct MemoryStream {
 	 */
 	@nogc @safe @property size_t opDollar(size_t dim: 0)() pure nothrow {
 		return length;
+	}
+
+	/**
+	 * Returns the underlying buffer.
+	 */
+	@nogc @safe @property const(ubyte)[] data() pure nothrow {
+		return _buffer.data;
 	}
 
 	/**
