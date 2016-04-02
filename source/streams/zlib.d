@@ -32,7 +32,8 @@ static auto zlibStream(Stream)(
 	Encoding encoding = Encoding.Guess,
 	int windowBits = WINDOW_BITS_DEFAULT) if (isStream!Stream) {
 	auto s = ZlibStream!Stream(stream, encoding, windowBits);
-	s.bufferSize = ZLIB_BUFFER_SIZE;
+	static if(!isDirectSource!Stream)
+		s.bufferSize = ZLIB_BUFFER_SIZE;
 	return s;
 }
 
@@ -57,16 +58,15 @@ static auto zlibStream(
  * Zlib stream structure
  */
 struct ZlibStreamBase(Stream) if (isStream!Stream) {
+	private enum isDirect = isDirectSource!Stream;
 	Stream base;
 
-	static if(!isDirectSource!Stream)
+	static if(!isDirect)
 		private ubyte[] buffer;
 	private z_stream zStream;
 	private bool init = false;
 
 	@disable this(this);
-
-	@disable long seekTo(long, From);
 
 	void cleanup() {
 		if(init) {
@@ -109,7 +109,7 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 		auto res = inflateInit2(&zStream, windowBits);
 		if(res != Z_OK)
 			throw new ZlibException(res);
-		static if(!isDirectSource!Stream)
+		static if(!isDirect)
 			buffer = new ubyte[ZLIB_BUFFER_SIZE];
 		init = true;
 	}
@@ -131,7 +131,7 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 			if(!init)
 				return 0;
 			if(zStream.avail_in == 0) {
-				static if(isDirectSource!Stream) {
+				static if(isDirect) {
 					auto slice = base.read(ZLIB_BUFFER_SIZE);
 					if(slice.length == 0)
 						return 0;
@@ -195,7 +195,14 @@ class ZlibException: Exception {
 
 import std.typecons;
 import io.buffer: FixedBuffer;
-alias ZlibStream(Stream) = RefCounted!(FixedBuffer!(ZlibStreamBase!Stream), RefCountedAutoInitialize.no);
+template StreamType(Stream) {
+	static if(isDirectSource!Stream)
+		alias type = ZlibStreamBase!Stream;
+	else
+		alias type = RefCounted!(FixedBuffer!(ZlibStreamBase!Stream), RefCountedAutoInitialize.no);
+}
+
+alias ZlibStream(Stream) = StreamType!(Stream).type;
 
 unittest {
 	import streams.memory;

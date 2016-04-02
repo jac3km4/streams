@@ -10,6 +10,8 @@
 module streams.slice;
 private {
 	import io.stream;
+
+	import streams.util.traits: isDirectSource;
 }
 
 /**
@@ -29,9 +31,12 @@ static auto sliceStream(Source)(auto ref Source source, size_t start, size_t len
  */
 struct SliceStreamBase(Source) if (isSource!Source) {
 	Source base;
+	alias base this;
 	private size_t start, length, position = 0;
 
 	@disable long seekTo(long, From);
+
+	@disable this(this);
 
 	/**
 	 * Creates a new slice stream based on the given source.
@@ -62,6 +67,26 @@ struct SliceStreamBase(Source) if (isSource!Source) {
 		auto read = base.read(buf[0..len]);
 		position += read;
 		return read;
+	}
+
+	static if (isDirectSource!Source) {
+		/**
+		 * Provides a direct access to a number of bytes.
+		 * If remaining bytes is less than size, then a
+		 * smaller slice is returned.
+		 */
+		const(ubyte[]) read(size_t size) {
+			if(position >= length)
+				return 0;
+			size_t len = size;
+			if(position + size > length)
+				len = length - position;
+			if(base.position != start + position)
+				base.seekTo(position);
+			auto slice = base.read(len);
+			position += slice.length;
+			return slice;
+		}
 	}
 }
 
