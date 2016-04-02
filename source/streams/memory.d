@@ -238,15 +238,23 @@ struct MemoryStream {
 	}
 
 	/**
-	 * Appends data to the buffer.
+	 * Inserts data in the buffer.
 	 *
 	 * Params:
-	 *   data = Byte array to be appended.
+	 *   data = Byte array to be inserted.
 	 *
-	 * Returns: The number of bytes that were appended.
+	 * Returns: The number of bytes that were inserted.
 	 */
-	@safe size_t write(in ubyte[] data) pure nothrow {
-		_buffer ~= data;
+	@safe size_t write(in ubyte[] data) pure {
+		auto length = _buffer.data.length;
+		if(_position == length) {
+			_buffer ~= data;
+		} else if(_position + data.length > length) {
+			_buffer.shrinkTo(_position);
+			_buffer ~= data;
+		} else if(_position + data.length < length) {
+			_buffer.data[_position.._position + data.length] = data[];
+		}
 		_position += data.length;
 		return data.length;
 	}
