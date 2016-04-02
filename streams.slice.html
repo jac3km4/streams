@@ -64,8 +64,8 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.slice.html" title="streams.slice"><i class="icon-th"></i>streams.slice</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.zlib.html" title="streams.zlib"><i class="icon-th"></i>streams.zlib</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.archive.zip.html" title="streams.archive.zip"><i class="icon-th"></i>streams.archive.zip</a></li>
+	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.direct.html" title="streams.util.direct"><i class="icon-th"></i>streams.util.direct</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.endian.html" title="streams.util.endian"><i class="icon-th"></i>streams.util.endian</a></li>
-	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.traits.html" title="streams.util.traits"><i class="icon-th"></i>streams.util.traits</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.wrappers.html" title="streams.util.wrappers"><i class="icon-th"></i>streams.util.wrappers</a></li>
 	</ul>
 	
@@ -107,8 +107,8 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.slice.html" title="streams.slice"><i class="icon-th"></i>streams.slice</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.zlib.html" title="streams.zlib"><i class="icon-th"></i>streams.zlib</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.archive.zip.html" title="streams.archive.zip"><i class="icon-th"></i>streams.archive.zip</a></li>
+	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.direct.html" title="streams.util.direct"><i class="icon-th"></i>streams.util.direct</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.endian.html" title="streams.util.endian"><i class="icon-th"></i>streams.util.endian</a></li>
-	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.traits.html" title="streams.util.traits"><i class="icon-th"></i>streams.util.traits</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.wrappers.html" title="streams.util.wrappers"><i class="icon-th"></i>streams.util.wrappers</a></li>
 					</noscript>
 					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams.slice</li>
@@ -151,11 +151,11 @@ This module provides stream-based read access to a
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="SliceStream">&nbsp;</span><a class="symbol-link" href="#SliceStream">SliceStream</a>(Source) if (isSource!Source);
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="SliceStreamBase">&nbsp;</span><a class="symbol-link" href="#SliceStreamBase">SliceStreamBase</a>(Source) if (isSource!Source);
 </h3></div>
 <div class="declaration-content"><dl><p>Slice stream structure.</p>
 </dl>
-<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this(auto ref Source <i>source</i>, size_t <i>start</i>, size_t <i>length</i>);
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Source <i>source</i>, size_t <i>start</i>, size_t <i>length</i>);
 </h3></div>
 <div class="declaration-content"><dl><p>Creates a new slice stream based on the given <i>source</i>.
 </p>
@@ -170,8 +170,35 @@ This module provides stream-based read access to a
 </div>
 <hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>buf</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Reads bytes into the specified buffer.
+<div class="declaration-content"><dl><p>Reads bytes into the specified buffer
+ from the underlying stream.
  The number of bytes <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> is returned.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte[]) <span class="symbol-target" id="opSlice">&nbsp;</span><a class="symbol-link" href="#opSlice">opSlice</a>(size_t <i>i</i>, size_t <i>j</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Returns a slice of the underyling
+ stream's buffer (if it allows such operation)..</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="opDollar">&nbsp;</span><a class="symbol-link" href="#opDollar">opDollar</a>(size_t dim : 0)();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns length of the underlying buffer.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="length">&nbsp;</span><a class="symbol-link" href="#length">length</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns <span class="symbol-target" id="length">&nbsp;</span><a class="symbol-link" href="#length">length</a> of the slice.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="position">&nbsp;</span><a class="symbol-link" href="#position">position</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns current <span class="symbol-target" id="position">&nbsp;</span><a class="symbol-link" href="#position">position</a> in the slice.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe void <span class="symbol-target" id="position">&nbsp;</span><a class="symbol-link" href="#position">position</a>(size_t <i>pos</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Sets <span class="symbol-target" id="position">&nbsp;</span><a class="symbol-link" href="#position">position</a> in the slice..</p>
 </dl>
 </div>
 </div>

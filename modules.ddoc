@@ -5,6 +5,6 @@ MODULES =
 	$(MODULE streams.slice)
 	$(MODULE streams.zlib)
 	$(MODULE streams.archive.zip)
+	$(MODULE streams.util.direct)
 	$(MODULE streams.util.endian)
-	$(MODULE streams.util.traits)
 	$(MODULE streams.util.wrappers)

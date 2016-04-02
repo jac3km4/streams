@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 	<meta charset="utf-8">
-	<title>streams.zlib - streams documentation</title>
+	<title>streams.util.direct - streams documentation</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -34,7 +34,7 @@
 	
 	<!-- Introduce DDoc settings required by JavaScript -->
 	<script type="text/javascript">
-		var Title = 'streams.zlib';
+		var Title = 'streams.util.direct';
 		var SourceRepository = 'https://github.com/jac3km4/streams/tree/master/source';
 		var PackageSeparator = '.';
 	</script>
@@ -84,7 +84,7 @@
 					</ul>
 					
 					<form id="gotosymbol" class="navbar-search pull-left hidden">
-						<input type="text" class="search-query" placeholder="Go to symbol in streams.zlib" data-provide="typeahead" data-items="4">
+						<input type="text" class="search-query" placeholder="Go to symbol in streams.util.direct" data-provide="typeahead" data-items="4">
 					</form>
 					
 					<p class="navbar-text pull-right"><a href="https://github.com/jac3km4/streams">Github Page</a></p>
@@ -111,7 +111,7 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.endian.html" title="streams.util.endian"><i class="icon-th"></i>streams.util.endian</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.wrappers.html" title="streams.util.wrappers"><i class="icon-th"></i>streams.util.wrappers</a></li>
 					</noscript>
-					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams.zlib</li>
+					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams.util.direct</li>
 				</ul>
 				</div><!--/.well -->
 			</div><!--/span-->
@@ -120,7 +120,7 @@
 				<div class="row-fluid">
 					<div class="span11">
 						<ul id="module-breadcrumb" class="breadcrumb">
-							<noscript><h1>streams.zlib</h1></noscript>
+							<noscript><h1>streams.util.direct</h1></noscript>
 						</ul>
 						
 					</div>
@@ -131,65 +131,28 @@
 				<div id="declaration-list">
 					<dl><dt>License</dt><dd>MIT
 </dd>
-<dt>Authors</dt><dd>Jacek Malec
-
-</dd>
-<dt>Description:</dt><dd>
-This module provides an interface to read and write Zlib streams</dd>
+<dt>Authors</dt><dd>Jacek Malec</dd>
 </dl>
-<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zlibStream">&nbsp;</span><a class="symbol-link" href="#zlibStream">zlibStream</a>(Stream)(auto ref Stream <i>stream</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT) if (isStream!Stream);
+<hr><div class="row-fluid declaration"><h3>enum auto <span class="symbol-target" id="isDirectSource">&nbsp;</span><a class="symbol-link" href="#isDirectSource">isDirectSource</a>(Source);
 </h3></div>
-<div class="declaration-content"><dl><p>Creates a Zlib <i>stream</i>.
-</p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
-<td>Base <i>stream</i>.</td></tr>
-<tr><td>Encoding <i>encoding</i></td>
-<td>Encoding to use.</td></tr>
-<tr><td>int <i>windowBits</i></td>
-<td>Window bits.</td></tr>
-</table></dd>
+<div class="declaration-content"><dl><p>Checks if a type is a direct source.
+ Direct source allows safely slicing it's original buffer.
+ It mut define property length, getter and setter position
+ and overload dollar and slice operators.</p>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="zlibStream">&nbsp;</span><a class="symbol-link" href="#zlibStream">zlibStream</a>(in string <i>path</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT);
+<hr><div class="row-fluid declaration"><h3>const(ubyte[]) <span class="symbol-target" id="directRead">&nbsp;</span><a class="symbol-link" href="#directRead">directRead</a>(Source)(auto ref Source <i>source</i>, size_t <i>size</i>) if (isDirectSource!Source);
 </h3></div>
-<div class="declaration-content"><dl><p>Open a file as a Zlib stream.
-</p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>string <i>path</i></td>
-<td>File <i>path</i>.</td></tr>
-<tr><td>Encoding <i>encoding</i></td>
-<td>Encoding to use.</td></tr>
-<tr><td>int <i>windowBits</i></td>
-<td>Window bits.</td></tr>
-</table></dd>
+<div class="declaration-content"><dl><p>Provides a direct access to a number of bytes.
+ If remaining bytes is less than <i>size</i>, then a
+ smaller slice is returned.</p>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ZlibStreamBase">&nbsp;</span><a class="symbol-link" href="#ZlibStreamBase">ZlibStreamBase</a>(Stream) if (isStream!Stream);
+<hr><div class="row-fluid declaration"><h3>const(ubyte[]) <span class="symbol-target" id="directReadAll">&nbsp;</span><a class="symbol-link" href="#directReadAll">directReadAll</a>(Source)(auto ref Source <i>source</i>, size_t <i>upTo</i> = -1) if (isDirectSource!Source);
 </h3></div>
-<div class="declaration-content"><dl><p>Zlib stream structure</p>
+<div class="declaration-content"><dl><p>Provides a direct access to bytes from current
+ position to the end of stream.</p>
 </dl>
-<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Stream <i>stream</i>, Encoding <i>encoding</i>, int <i>windowBits</i>);
-</h3></div>
-<div class="declaration-content"><dl><p>Creates a Zlib <i>stream</i>.
-</p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
-<td>Base <i>stream</i>.</td></tr>
-<tr><td>Encoding <i>encoding</i></td>
-<td>Encoding to use.</td></tr>
-<tr><td>int <i>windowBits</i></td>
-<td>Window bits.</td></tr>
-</table></dd>
-</dl>
-</div>
-<hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>chunk</i>);
-</h3></div>
-<div class="declaration-content"><dl><p>Reads and decodes bytes from a base stream.
-</p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>chunk</i></td>
-<td>Byte buffer to <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> into.</td></tr>
-</table></dd>
-</dl>
-</div>
-</div>
 </div>
 
 
