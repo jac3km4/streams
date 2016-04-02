@@ -66,8 +66,6 @@ static auto copyToMemory(Source)(
 	auto ref Source source,
 	size_t upTo = -1,
 	size_t bufferSize = 64 * 1024) if (isSource!Source) {
-	import std.array: uninitializedArray;
-
 	static if(isSeekable!Source) {
 		auto buf = source.readAll(upTo);
 		alias bytes = buf;
