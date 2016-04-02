@@ -12,7 +12,6 @@ private {
 
 	import io.stream;
 
-	import streams: unbufferedFileStream;
 	import streams.util.traits: isDirectSource;
 }
 
@@ -49,6 +48,8 @@ static auto zlibStream(
 	in string path,
 	Encoding encoding = Encoding.Guess,
 	int windowBits = WINDOW_BITS_DEFAULT) {
+	import streams: unbufferedFileStream;
+
 	return zlibStream(unbufferedFileStream(path));
 }
 
@@ -145,7 +146,7 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 				}
 			}
 			zStream.avail_out = to!uint(chunk.length);
-			zStream.next_out = cast(ubyte*)chunk.ptr;
+			zStream.next_out = chunk.ptr;
 			auto ret = inflate(&zStream, Z_NO_FLUSH);
 			switch(ret) {
 				case Z_NEED_DICT:

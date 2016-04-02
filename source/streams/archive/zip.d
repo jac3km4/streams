@@ -197,12 +197,10 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream) {
 		stream.seekTo(-blockSize, From.end);
 		auto block = uninitializedArray!(ubyte[])(blockSize);
 		stream.readExactly(block);
-		auto mem = memoryStream(block);
 		if(blockSize >= EndOfCentralDirRecord.RawData.sizeof) {
 			for(size_t i = blockSize - EndOfCentralDirRecord.RawData.sizeof; i >= 0; --i) {
 				if(*(cast(uint*)(block.ptr + i)) == EndOfCentralDirRecord.signature) {
-					EndOfCentralDirRecord eocd;
-					mem.seekTo(i + 4);
+					auto mem = memoryStream(block[i+4..$]);
 					eocd.read(mem);
 					return eocd;
 				}
