@@ -68,13 +68,15 @@ static auto copyToMemory(Source)(
 	size_t bufferSize = 64 * 1024) if (isSource!Source) {
 	import std.array: uninitializedArray;
 
-	static if(isSeekable!Source)
-		return memoryStream(cast(immutable(ubyte)[])source.readAll(upTo));
-	else {
+	static if(isSeekable!Source) {
+		auto buf = source.readAll(upTo);
+		alias data = buf;
+	} else {
 		auto mem = memoryStream();
 		source.copyTo(mem, upTo, bufferSize);
-		return memoryStream(cast(immutable(ubyte)[])mem.data);
+		alias data = mem.data;
 	}
+	return cast(immutable(byte)[])data;
 }
 
 /**
