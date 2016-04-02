@@ -13,6 +13,7 @@ private {
 	import io.stream;
 
 	import streams: unbufferedFileStream;
+	import streams.util.traits: isDirectSource;
 }
 
 private enum WINDOW_BITS_DEFAULT = 15;
@@ -57,7 +58,8 @@ static auto zlibStream(
 struct ZlibStreamBase(Stream) if (isStream!Stream) {
 	Stream base;
 
-	private ubyte[] buffer;
+	static if(!isDirectSource!Stream)
+		private ubyte[] buffer;
 	private z_stream zStream;
 	private bool init = false;
 
@@ -106,7 +108,8 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 		auto res = inflateInit2(&zStream, windowBits);
 		if(res != Z_OK)
 			throw new ZlibException(res);
-		buffer = new ubyte[ZLIB_BUFFER_SIZE];
+		static if(!isDirectSource!Stream)
+			buffer = new ubyte[ZLIB_BUFFER_SIZE];
 		init = true;
 	}
 
@@ -122,17 +125,26 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 		 * 	chunk = Byte buffer to read into.
 		 */
 		size_t read(ubyte[] chunk) {
+			import std.conv: to;
+
 			if(!init)
 				return 0;
 			if(zStream.avail_in == 0) {
-				auto len = base.read(buffer);
-				if(len == 0) {
-					return 0;
+				static if(isDirectSource!Stream) {
+					auto slice = base.read(ZLIB_BUFFER_SIZE);
+					if(slice.length == 0)
+						return 0;
+					zStream.avail_in = to!uint(slice.length);
+					zStream.next_in = slice.ptr;
+				} else {
+					auto len = base.read(buffer);
+					if(len == 0)
+						return 0;
+					zStream.avail_in = to!uint(len);
+					zStream.next_in = buffer.ptr;
 				}
-				zStream.avail_in = cast(uint)len;
-				zStream.next_in = buffer.ptr;
 			}
-			zStream.avail_out = cast(uint)chunk.length;
+			zStream.avail_out = to!uint(chunk.length);
 			zStream.next_out = cast(ubyte*)chunk.ptr;
 			auto ret = inflate(&zStream, Z_NO_FLUSH);
 			switch(ret) {
