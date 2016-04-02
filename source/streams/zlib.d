@@ -63,15 +63,15 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 
 	static if(!isDirect)
 		private ubyte[] buffer;
-	private z_stream zStream;
-	private bool init = false;
+	private z_stream _zStream;
+	private bool _init = false;
 
 	@disable this(this);
 
 	void cleanup() {
-		if(init) {
-			inflateEnd(&zStream);
-			init = false;
+		if(_init) {
+			inflateEnd(&_zStream);
+			_init = false;
 		}
 	}
 	/**
@@ -99,19 +99,19 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 			default:
 				throw new ZlibException("Invalid encoding");
 		}
-		with(zStream) {
+		with(_zStream) {
 			zalloc = null;
 			zfree = null;
 			opaque = null;
 			avail_in = 0;
 			next_in = null;
 		}
-		auto res = inflateInit2(&zStream, windowBits);
+		auto res = inflateInit2(&_zStream, windowBits);
 		if(res != Z_OK)
 			throw new ZlibException(res);
 		static if(!isDirect)
 			buffer = new ubyte[ZLIB_BUFFER_SIZE];
-		init = true;
+		_init = true;
 	}
 
 	~this() {
@@ -128,26 +128,26 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 		size_t read(ubyte[] chunk) {
 			import std.conv: to;
 
-			if(!init)
+			if(!_init)
 				return 0;
-			if(zStream.avail_in == 0) {
+			if(_zStream.avail_in == 0) {
 				static if(isDirect) {
 					auto slice = base.directRead(ZLIB_BUFFER_SIZE);
 					if(slice.length == 0)
 						return 0;
-					zStream.avail_in = to!uint(slice.length);
-					zStream.next_in = slice.ptr;
+					_zStream.avail_in = to!uint(slice.length);
+					_zStream.next_in = slice.ptr;
 				} else {
 					auto len = base.read(buffer);
 					if(len == 0)
 						return 0;
-					zStream.avail_in = to!uint(len);
-					zStream.next_in = buffer.ptr;
+					_zStream.avail_in = to!uint(len);
+					_zStream.next_in = buffer.ptr;
 				}
 			}
-			zStream.avail_out = to!uint(chunk.length);
-			zStream.next_out = chunk.ptr;
-			auto ret = inflate(&zStream, Z_NO_FLUSH);
+			_zStream.avail_out = to!uint(chunk.length);
+			_zStream.next_out = chunk.ptr;
+			auto ret = inflate(&_zStream, Z_NO_FLUSH);
 			switch(ret) {
 				case Z_NEED_DICT:
 				case Z_DATA_ERROR:
@@ -159,7 +159,7 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 					break;
 				default:
 			}
-			return chunk.length - zStream.avail_out;
+			return chunk.length - _zStream.avail_out;
 		}
 	}
 }
