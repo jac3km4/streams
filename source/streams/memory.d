@@ -70,13 +70,14 @@ static auto copyToMemory(Source)(
 
 	static if(isSeekable!Source) {
 		auto buf = source.readAll(upTo);
-		alias data = buf;
+		alias bytes = buf;
 	} else {
 		auto mem = memoryStream();
 		source.copyTo(mem, upTo, bufferSize);
-		alias data = mem.data;
+		auto buf = mem.data;
+		alias bytes = buf;
 	}
-	return cast(immutable(byte)[])data;
+	return memoryStream(cast(immutable(ubyte)[])bytes);
 }
 
 /**
@@ -102,14 +103,15 @@ struct ReadOnlyMemoryStream {
 	 */
 	@nogc @safe size_t read(ubyte[] buf) pure nothrow {
 		auto remaining = buffer.length - position;
-		size_t len;
 		if(remaining == 0)
 			return 0;
+		size_t len;
 		if(remaining < buf.length)
 			len = remaining;
 		else len = buf.length;
-		buf[0..len] = buffer[position..position+len];
-		position += len;
+		auto end = position + len;
+		buf[0..len] = buffer[position..end];
+		position = end;
 		return len;
 	}
 
@@ -120,14 +122,15 @@ struct ReadOnlyMemoryStream {
 	 */
 	@nogc @safe const(ubyte[]) read(size_t size) pure nothrow {
 		auto remaining = buffer.length - position;
-		size_t len;
 		if(remaining == 0)
 			return [];
+		size_t len;
 		if(remaining < size)
 			len = remaining;
 		else len = size;
-		auto slice = buffer[position..position+len];
-		position += len;
+		auto end = position + len;
+		auto slice = buffer[position..end];
+		position = end;
 		return slice;
 	}
 
@@ -207,14 +210,15 @@ struct MemoryStream {
 	@nogc @safe size_t read(ubyte[] buf) pure nothrow {
 		auto data = buffer.data;
 		auto remaining = data.length - position;
-		size_t len;
 		if(remaining == 0)
 			return 0;
+		size_t len;
 		if(remaining < buf.length)
 			len = remaining;
 		else len = buf.length;
-		buf[0..len] = data[position..position+len];
-		position += len;
+		auto end = position + len;
+		buf[0..len] = data[position..end];
+		position = end;
 		return len;
 	}
 
@@ -226,14 +230,15 @@ struct MemoryStream {
 	@nogc @safe const(ubyte[]) read(size_t size) pure nothrow {
 		auto data = buffer.data;
 		auto remaining = data.length - position;
-		size_t len;
 		if(remaining == 0)
 			return [];
+		size_t len;
 		if(remaining < size)
 			len = remaining;
 		else len = size;
-		auto slice = data[position..position+len];
-		position += len;
+		auto end = position + len;
+		auto slice = data[position..end];
+		position = end;
 		return slice;
 	}
 
