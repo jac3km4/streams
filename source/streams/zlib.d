@@ -27,52 +27,66 @@ enum ZLIB_BUFFER_SIZE = 256 * 1024;
  * 	encoding = Encoding to use.
  * 	windowBits = Window bits.
  */
-static auto zlibStream(Stream)(
+static auto zlibInputStream(Stream)(
 	auto ref Stream stream,
 	Encoding encoding = Encoding.Guess,
-	int windowBits = WINDOW_BITS_DEFAULT) if (isStream!Stream) {
-	auto s = ZlibStream!Stream(stream, encoding, windowBits);
+	int windowBits = WINDOW_BITS_DEFAULT) if (isSource!Stream) {
+	auto s = ZlibInputStream!Stream(stream, encoding, windowBits);
 	static if(!isDirectSource!Stream)
 		s.bufferSize = ZLIB_BUFFER_SIZE;
 	return s;
 }
 
 /**
- * Open a file as a Zlib stream.
+ * Creates a Zlib stream.
  * 
  * Params:
- * 	path = File path.
+ * 	stream = Base stream.
  * 	encoding = Encoding to use.
  * 	windowBits = Window bits.
  */
-static auto zlibStream(
-	in string path,
-	Encoding encoding = Encoding.Guess,
-	int windowBits = WINDOW_BITS_DEFAULT) {
-	import streams: unbufferedFileStream;
-
-	return zlibStream(unbufferedFileStream(path));
+static auto zlibOutputStream(Stream)(
+	auto ref Stream sink,
+	CompressionLevel level = CompressionLevel.Normal) if (isSink!Stream) {
+	return zlibOutputStream(sink, level, Encoding.Zlib);
 }
 
 /**
- * Zlib stream structure
+ * Creates a Zlib stream.
+ * 
+ * Params:
+ * 	stream = Base stream.
+ * 	encoding = Encoding to use.
+ * 	windowBits = Window bits.
  */
-struct ZlibStreamBase(Stream) if (isStream!Stream) {
-	private enum _isDirect = isDirectSource!Stream;
-	Stream base;
+static auto zlibOutputStream(Stream)(
+	auto ref Stream sink,
+	CompressionLevel level,
+	Encoding encoding,
+	int windowBits = WINDOW_BITS_DEFAULT) if (isSink!Stream) {
+	return ZlibOutputStream!Stream(sink, level, encoding, windowBits);
+}
 
-	static if(!_isDirect)
-		private ubyte[] _buffer;
+/**
+ * Zlib input stream structure
+ */
+struct ZlibInputStreamBase(Source) if (isSource!Source) {
+	Source base;
 	private z_stream _zStream;
 	private bool _init = false;
 
+	static if(!_isDirect)
+		private ubyte[] _buffer;
+
+	private enum _isDirect = isDirectSource!Source;
+
 	@disable this(this);
 
-	void cleanup() {
-		if(_init) {
-			inflateEnd(&_zStream);
-			_init = false;
-		}
+	private void cleanup() {
+		if(!_init)
+			throw new ZlibException("Stream is closed");
+		inflateEnd(&_zStream);
+		_init = false;
 	}
 	/**
 	 * Creates a Zlib stream.
@@ -82,8 +96,7 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 	 * 	encoding = Encoding to use.
 	 * 	windowBits = Window bits.
 	 */
-	this()(auto ref Stream stream, Encoding encoding, int windowBits) {
-		base = stream;
+	this()(auto ref Source stream, Encoding encoding, int windowBits) {
 		switch(encoding) {
 			case Encoding.Zlib:
 				break;
@@ -109,57 +122,158 @@ struct ZlibStreamBase(Stream) if (isStream!Stream) {
 		auto res = inflateInit2(&_zStream, windowBits);
 		if(res != Z_OK)
 			throw new ZlibException(res);
+		base = stream;
 		static if(!_isDirect)
 			_buffer = new ubyte[ZLIB_BUFFER_SIZE];
 		_init = true;
 	}
 
 	~this() {
-		cleanup();
+		if(_init)
+			cleanup();
 	}
 
-	static if(isSource!Stream) {
-		/**
-		 * Reads and decodes bytes from a base stream.
-		 * 
-		 * Params:
-		 * 	chunk = Byte buffer to read into.
-		 */
-		size_t read(ubyte[] chunk) {
-			import std.conv: to;
+	/**
+	 * Reads and decodes bytes from a base stream.
+	 * 
+	 * Params:
+	 * 	buf = Byte buffer to read into.
+	 */
+	size_t read(ubyte[] buf) {
+		import std.conv: to;
 
-			if(!_init)
-				return 0;
-			if(_zStream.avail_in == 0) {
-				static if(_isDirect) {
-					auto slice = base.directRead(ZLIB_BUFFER_SIZE);
-					if(slice.length == 0)
-						return 0;
-					_zStream.avail_in = to!uint(slice.length);
-					_zStream.next_in = slice.ptr;
-				} else {
-					auto len = base.read(_buffer);
-					if(len == 0)
-						return 0;
-					_zStream.avail_in = to!uint(len);
-					_zStream.next_in = _buffer.ptr;
-				}
+		if(!_init)
+			return 0;
+		if(_zStream.avail_in == 0) {
+			static if(_isDirect) {
+				auto slice = base.directRead(ZLIB_BUFFER_SIZE);
+				if(slice.length == 0)
+					return 0;
+				_zStream.avail_in = to!uint(slice.length);
+				_zStream.next_in = slice.ptr;
+			} else {
+				auto len = base.read(_buffer);
+				if(len == 0)
+					return 0;
+				_zStream.avail_in = to!uint(len);
+				_zStream.next_in = _buffer.ptr;
 			}
-			_zStream.avail_out = to!uint(chunk.length);
-			_zStream.next_out = chunk.ptr;
-			auto ret = inflate(&_zStream, Z_NO_FLUSH);
-			switch(ret) {
-				case Z_NEED_DICT:
-				case Z_DATA_ERROR:
-				case Z_MEM_ERROR:
-					cleanup();
-					throw new ZlibException(ret);
+		}
+		_zStream.avail_out = to!uint(buf.length);
+		_zStream.next_out = buf.ptr;
+		auto ret = inflate(&_zStream, Z_NO_FLUSH);
+		switch(ret) {
+			case Z_NEED_DICT:
+			case Z_DATA_ERROR:
+			case Z_MEM_ERROR:
+				cleanup();
+				throw new ZlibException(ret);
+			case Z_STREAM_END:
+				cleanup();
+				break;
+			default:
+		}
+		return buf.length - _zStream.avail_out;
+	}
+}
+
+struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
+	Sink base;
+	private bool _init = false;
+	private z_stream _zStream;
+	private ubyte[] _buffer;
+
+	private void cleanup() {
+		if(!_init)
+			throw new ZlibException("Stream is closed");
+		deflateEnd(&_zStream);
+		_init = false;
+	}
+
+	@disable this(this);
+
+	this()(
+		auto ref Sink sink,
+		CompressionLevel level,
+		Encoding encoding,
+		int windowBits = WINDOW_BITS_DEFAULT) {
+
+		switch(encoding) {
+			case Encoding.Zlib:
+				break;
+			case Encoding.Gzip:
+				windowBits += 16;
+				break;
+			case Encoding.None:
+				windowBits *= -1;
+				break;
+			default:
+				throw new ZlibException("Invalid encoding");
+		}
+		with(_zStream) {
+			zalloc = null;
+			zfree = null;
+			opaque = null;
+		}
+		auto res = deflateInit2(&_zStream, level, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
+		if(res != Z_OK)
+			throw new ZlibException(res);
+		base = sink;
+		_init = true;
+		_buffer = new ubyte[ZLIB_BUFFER_SIZE];
+	}
+
+	~this() {
+		if(_init)
+			cleanup();
+	}
+
+	size_t write(in ubyte[] src) {
+		import std.conv: to;
+		import std.stdio: writeln;
+
+		if(!_init)
+			throw new ZlibException("Cannot write to a closed stream");
+		_zStream.avail_in = to!uint(src.length); 
+		_zStream.next_in = src.ptr;
+		do {
+			_zStream.avail_out = to!uint(_buffer.length);
+			_zStream.next_out = _buffer.ptr;
+			auto res = deflate(&_zStream, Z_NO_FLUSH);
+			if(res != Z_OK)
+				throw new ZlibException(res);
+			auto length = _buffer.length - _zStream.avail_out;
+			base.writeExactly(_buffer[0..length]);
+		} while(_zStream.avail_out == 0);
+		return src.length;
+	}
+
+	void flush() {
+		import std.conv: to;
+		import std.stdio: writeln;
+
+		if(!_init)
+			throw new ZlibException("Cannot commit to a closed stream");
+		with(_zStream) {
+			avail_in = 0;
+			next_in = null;
+		}
+		while(true) {
+			_zStream.avail_out = to!uint(_buffer.length);
+			_zStream.next_out = _buffer.ptr;
+			auto res = deflate(&_zStream, Z_FINISH);
+			switch(res) {
+				case Z_OK:
+					auto length = _buffer.length - _zStream.avail_out;
+					base.writeExactly(_buffer[0..length]);
+					continue;
 				case Z_STREAM_END:
 					cleanup();
-					break;
+					return;
 				default:
+					throw new ZlibException(res);
 			}
-			return chunk.length - _zStream.avail_out;
+
 		}
 	}
 }
@@ -169,6 +283,13 @@ enum Encoding {
 	Zlib,
 	Gzip,
 	None
+}
+
+enum CompressionLevel {
+	Normal = -1,
+	None = 0,
+	Fast = 1,
+	Best = 9
 }
 
 class ZlibException: Exception {
@@ -196,21 +317,39 @@ class ZlibException: Exception {
 import std.typecons;
 import io.buffer: FixedBuffer;
 
-template StreamType(Stream) {
+private template InputStreamType(Stream) {
 	static if(isDirectSource!Stream)
-		alias type = RefCounted!(ZlibStreamBase!Stream, RefCountedAutoInitialize.no);
+		alias type = RefCounted!(ZlibInputStreamBase!Stream, RefCountedAutoInitialize.no);
 	else
 		alias type = RefCounted!(FixedBuffer!(ZlibStreamBase!Stream), RefCountedAutoInitialize.no);
 }
 
-alias ZlibStream(Stream) = StreamType!(Stream).type;
+alias ZlibInputStream(Stream) = InputStreamType!(Stream).type;
+
+alias ZlibOutputStream(Stream) = ZlibOutputStreamBase!Stream;
 
 unittest {
 	import streams.memory;
+	{
 
-	// this is zlib encoded string "drocks"
-	immutable(ubyte)[] raw = [0x78,0x9C,0x4B,0x29,0xCA,0x4F,0xCE,0x2E,0x06,0x00,0x08,0xC6,0x02,0x87];
-	auto mem = memoryStream(raw);
-	auto zlib = zlibStream(mem);
-	assert("drocks" == zlib.copyToMemory.data);
+		// this is zlib encoded string "drocks"
+		immutable(ubyte)[] raw = [0x78,0x9C,0x4B,0x29,0xCA,0x4F,0xCE,0x2E,0x06,0x00,0x08,0xC6,0x02,0x87];
+		auto mem = memoryStream(raw);
+		auto zlib = zlibInputStream(mem);
+		assert("drocks" == zlib.copyToMemory.data);
+	}
+	{
+		import streams.data;
+		import std.stdio: writeln;
+
+		auto mem = memoryStream(1024);
+		auto zlibOut = zlibOutputStream(mem, CompressionLevel.Fast);
+		zlibOut.encode(2);
+		zlibOut.encode(10);
+		zlibOut.flush();
+		writeln(mem.data);
+		// this currently does not work for some reason
+		auto zlibIn = zlibInputStream(mem);
+		assert(zlibIn.decode!int == 2);
+	}
 }
