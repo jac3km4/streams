@@ -27,7 +27,7 @@ static auto sliceStream(Source)(auto ref Source source, size_t start, size_t len
 /**
  * Slice stream structure.
  */
-struct SliceStream(Source) if (isSource!Source) {
+struct SliceStreamBase(Source) if (isSource!Source) {
 	Source base;
 	private size_t start, length, position = 0;
 
@@ -64,3 +64,6 @@ struct SliceStream(Source) if (isSource!Source) {
 		return read;
 	}
 }
+
+import std.typecons;
+alias SliceStream(Stream) = RefCounted!(SliceStreamBase!Stream, RefCountedAutoInitialize.no);
