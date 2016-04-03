@@ -20,7 +20,7 @@ private enum WINDOW_BITS_DEFAULT = 15;
 enum ZLIB_BUFFER_SIZE = 256 * 1024;
 
 /**
- * Creates a Zlib stream.
+ * Creates an input Zlib stream.
  * 
  * Params:
  * 	stream = Base stream.
@@ -38,29 +38,29 @@ static auto zlibInputStream(Stream)(
 }
 
 /**
- * Creates a Zlib stream.
+ * Creates an output Zlib stream.
  * 
  * Params:
  * 	stream = Base stream.
- * 	encoding = Encoding to use.
- * 	windowBits = Window bits.
+ * 	level = Compression level.
  */
 static auto zlibOutputStream(Stream)(
-	auto ref Stream sink,
+	auto ref Stream stream,
 	CompressionLevel level = CompressionLevel.Normal) if (isSink!Stream) {
 	return zlibOutputStream(sink, level, Encoding.Zlib);
 }
 
 /**
- * Creates a Zlib stream.
+ * Creates an output Zlib stream.
  * 
  * Params:
  * 	stream = Base stream.
+ * 	level = Compression level.
  * 	encoding = Encoding to use.
  * 	windowBits = Window bits.
  */
 static auto zlibOutputStream(Stream)(
-	auto ref Stream sink,
+	auto ref Stream stream,
 	CompressionLevel level,
 	Encoding encoding,
 	int windowBits = WINDOW_BITS_DEFAULT) if (isSink!Stream) {
@@ -88,8 +88,9 @@ struct ZlibInputStreamBase(Source) if (isSource!Source) {
 		inflateEnd(&_zStream);
 		_init = false;
 	}
+
 	/**
-	 * Creates a Zlib stream.
+	 * Creates an input Zlib stream.
 	 * 
 	 * Params:
 	 * 	stream = Base stream.
@@ -134,7 +135,7 @@ struct ZlibInputStreamBase(Source) if (isSource!Source) {
 	}
 
 	/**
-	 * Reads and decodes bytes from a base stream.
+	 * Reads and decompresses bytes from a base stream.
 	 * 
 	 * Params:
 	 * 	buf = Byte buffer to read into.
@@ -177,6 +178,9 @@ struct ZlibInputStreamBase(Source) if (isSource!Source) {
 	}
 }
 
+/**
+ * Zlib output stream structure
+ */
 struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 	Sink base;
 	private bool _init = false;
@@ -192,8 +196,17 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 
 	@disable this(this);
 
+	/**
+	 * Creates an output Zlib stream.
+	 * 
+	 * Params:
+	 * 	stream = Base stream.
+	 * 	level = Compression level.
+	 * 	encoding = Encoding to use.
+	 * 	windowBits = Window bits.
+	 */
 	this()(
-		auto ref Sink sink,
+		auto ref Sink stream,
 		CompressionLevel level,
 		Encoding encoding,
 		int windowBits = WINDOW_BITS_DEFAULT) {
@@ -217,7 +230,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 		auto res = deflateInit2(&_zStream, level, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
 		if(res != Z_OK)
 			throw new ZlibException(res);
-		base = sink;
+		base = stream;
 		_init = true;
 		_buffer = new ubyte[ZLIB_BUFFER_SIZE];
 	}
@@ -227,6 +240,15 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 			cleanup();
 	}
 
+	/**
+	 * Writes bytes into a stream.
+	 * Note: this is not guaranteed to immediately
+	 * write data into the underlying stream.
+	 * Only calling flush guarantees that.
+	 * 
+	 * Params:
+	 * 	src = Bytes to compress.
+	 */
 	size_t write(in ubyte[] src) {
 		import std.conv: to;
 
@@ -246,7 +268,10 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 		} while(_zStream.avail_out == 0);
 		return src.length;
 	}
-
+	/**
+	 * Finishes writing, pushing all the data into
+	 * the underlying stream. Closes the stream.
+	 */ 
 	void flush() {
 		import std.conv: to;
 
@@ -279,6 +304,9 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 	}
 }
 
+/**
+ * Zlib encoding types
+ */
 enum Encoding {
 	Guess,
 	Zlib,
@@ -286,6 +314,9 @@ enum Encoding {
 	None
 }
 
+/**
+ * Zlib compression levels
+ */
 enum CompressionLevel {
 	Normal = -1,
 	None = 0,
