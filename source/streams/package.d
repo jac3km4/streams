@@ -7,9 +7,10 @@
  * 
  */
 module streams;
-private {
-	import io.file;
-	import io.stream;
+private
+{
+    import io.file;
+    import io.stream;
 }
 
 /**
@@ -19,8 +20,9 @@ private {
  * 	path = Path to the file.
  * 	flags = File flags.
  */
-static auto fileStream(string path, FileFlags flags = FileFlags.readExisting) {
-	return File(path, flags);
+static auto fileStream(string path, FileFlags flags = FileFlags.readExisting)
+{
+    return File(path, flags);
 }
 
 /**
@@ -30,8 +32,9 @@ static auto fileStream(string path, FileFlags flags = FileFlags.readExisting) {
  * 	path = Path to the file.
  * 	flags = File flags.
  */
-static auto unbufferedFileStream(string path, FileFlags flags = FileFlags.readExisting) {
-	return UnbufferedFile(path, flags);
+static auto unbufferedFileStream(string path, FileFlags flags = FileFlags.readExisting)
+{
+    return UnbufferedFile(path, flags);
 }
 
 /**
@@ -44,42 +47,51 @@ static auto unbufferedFileStream(string path, FileFlags flags = FileFlags.readEx
  * 	upTo = Maximum number of bytes to copy (all if -1).
  * 	bufferSize = The size of memory buffer to use.
  */
-static void copyTo(Source, Sink)(
-	auto ref Source source,
-	auto ref Sink sink,
-	size_t upTo = -1,
-	size_t bufferSize = 64 * 1024) if (isSource!Source && isSink!Sink) {
-	import std.array: uninitializedArray;
-	import streams.util.direct;
+static void copyTo(Source, Sink)(auto ref Source source, auto ref Sink sink,
+    size_t upTo = -1, size_t bufferSize = 64 * 1024) if (isSource!Source && isSink!Sink)
+{
+    import std.array : uninitializedArray;
+    import streams.util.direct : directReadAll, isDirectSource;
 
-	static if(isDirectSource!Source) {
-		sink.write(source.directReadAll(upTo));
-	} else {
-		auto buffer = uninitializedArray!(ubyte[])(bufferSize);
-		if(upTo != -1) {
-			size_t count = 0;
-			while(count < upTo) {
-				size_t read = source.read(buffer);
-				if(read == 0) break;
-				count += read;
-				sink.write(buffer[0..read]);
-			}
-		} else {
-			while(true) {
-				size_t read = source.read(buffer);
-				if(read == 0) break;
-				sink.write(buffer[0..read]);
-			}
-		}
-	}
+    static if (isDirectSource!Source)
+    {
+        sink.write(source.directReadAll(upTo));
+    }
+    else
+    {
+        auto buffer = uninitializedArray!(ubyte[])(bufferSize);
+        if (upTo != -1)
+        {
+            size_t count = 0;
+            while (count < upTo)
+            {
+                size_t read = source.read(buffer);
+                if (read == 0)
+                    break;
+                count += read;
+                sink.write(buffer[0 .. read]);
+            }
+        }
+        else
+        {
+            while (true)
+            {
+                size_t read = source.read(buffer);
+                if (read == 0)
+                    break;
+                sink.write(buffer[0 .. read]);
+            }
+        }
+    }
 }
 
-unittest {
-	import streams.memory;
+unittest
+{
+    import streams.memory : memoryStream;
 
-	immutable(ubyte[]) raw = [1, 2, 3, 4, 5, 6];
-	auto mem1 = memoryStream(raw);
-	auto mem2 = memoryStream();
-	mem1.copyTo(mem2);
-	assert(mem1.data[] == mem2.data[]);
+    immutable(ubyte[]) raw = [1, 2, 3, 4, 5, 6];
+    auto mem1 = memoryStream(raw);
+    auto mem2 = memoryStream();
+    mem1.copyTo(mem2);
+    assert(mem1.data[] == mem2.data[]);
 }
