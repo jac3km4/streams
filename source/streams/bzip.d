@@ -48,6 +48,9 @@ static auto bzipOutputStream(Stream)(
 	return BzipOutputStream!Stream(stream, blockSize);
 }
 
+/**
+ * bzip2 input stream structure
+ */
 struct BzipInputStreamBase(Source) if (isSource!Source) {
 	Source base;
 	private bz_stream _bzStream;
@@ -63,6 +66,14 @@ struct BzipInputStreamBase(Source) if (isSource!Source) {
 		_init = false;
 	}
 
+	/**
+	 * Creates an input zlib2 stream.
+	 * 
+	 * Params:
+	 * 	stream = Base stream.
+	 *  small = Whether the library will use an alternative decompression algorithm
+	 * 			which uses less memory but at the cost of decompressing more slowly.
+	 */
 	this()(auto ref Source source, bool small) {
 		auto res = BZ2_bzDecompressInit(&_bzStream, 0, small);
 		if(res != BZ_OK)
@@ -131,6 +142,15 @@ struct BzipOutputStreamBase(Sink) if (isSink!Sink) {
 		_init = false;
 	}
 
+	/**
+	 * Creates an output zlib2 stream.
+	 * 
+	 * Params:
+	 * 	stream = Base stream.
+	 * 	blockSize = Block size to be used for compression. It should be a value between 1 and 9 inclusive,
+	 * 				and the actual block size used is 100000 x this figure.
+	 * 				9 gives the best compression but takes most memory.
+	 */
 	this()(auto ref Sink sink, BlockSize blockSize) {
 		if(blockSize < 1 || blockSize > 9)
 			throw new BzipException("bzip2 block size has to be between 1 and 9");
@@ -207,11 +227,13 @@ struct BzipOutputStreamBase(Sink) if (isSink!Sink) {
 	}
 }
 
-enum BlockSize: int
-{
+/**
+ * zlib2 block size
+ */
+enum BlockSize : int {
 	Normal = 9,
 	Fast = 1,
-	Best = 9,
+	Best = 9
 }
 
 class BzipException: Exception {
