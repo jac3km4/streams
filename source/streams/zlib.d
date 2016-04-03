@@ -47,7 +47,7 @@ static auto zlibInputStream(Stream)(
 static auto zlibOutputStream(Stream)(
 	auto ref Stream stream,
 	CompressionLevel level = CompressionLevel.Normal) if (isSink!Stream) {
-	return zlibOutputStream(sink, level, Encoding.Zlib);
+	return zlibOutputStream(stream, level, Encoding.Zlib);
 }
 
 /**
@@ -64,7 +64,7 @@ static auto zlibOutputStream(Stream)(
 	CompressionLevel level,
 	Encoding encoding,
 	int windowBits = WINDOW_BITS_DEFAULT) if (isSink!Stream) {
-	return ZlibOutputStream!Stream(sink, level, encoding, windowBits);
+	return ZlibOutputStream!Stream(stream, level, encoding, windowBits);
 }
 
 /**
@@ -268,6 +268,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 		} while(_zStream.avail_out == 0);
 		return src.length;
 	}
+
 	/**
 	 * Finishes writing, pushing all the data into
 	 * the underlying stream. Closes the stream.
@@ -283,7 +284,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 			next_in = null;
 		}
 		bool finish = false;
-		while(!finish) {
+		do {
 			_zStream.avail_out = to!uint(_buffer.length);
 			_zStream.next_out = _buffer.ptr;
 			auto res = deflate(&_zStream, Z_FINISH);
@@ -300,7 +301,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 			auto length = _buffer.length - _zStream.avail_out;
 			if(length > 0)
 				base.writeExactly(_buffer[0..length]);
-		}
+		} while(!finish);
 	}
 }
 
@@ -358,7 +359,7 @@ private template InputStreamType(Stream) {
 
 alias ZlibInputStream(Stream) = InputStreamType!(Stream).type;
 
-alias ZlibOutputStream(Stream) = ZlibOutputStreamBase!Stream;
+alias ZlibOutputStream(Stream) = RefCounted!(ZlibOutputStreamBase!Stream, RefCountedAutoInitialize.no);
 
 unittest {
 	import streams.memory;
