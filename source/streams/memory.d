@@ -22,7 +22,7 @@ private {
  * Params:
  * 	data = Immutable byte array.
  */
-static @nogc @safe auto memoryStream(immutable(ubyte)[] data) pure nothrow {
+static @nogc auto memoryStream(immutable(ubyte)[] data) nothrow {
 	return ReadOnlyMemoryStream(data);
 }
 
@@ -32,7 +32,7 @@ static @nogc @safe auto memoryStream(immutable(ubyte)[] data) pure nothrow {
  * Params:
  * 	data = Byte array.
  */
-static auto @safe memoryStream(ubyte[] data) pure nothrow {
+static auto memoryStream(ubyte[] data) nothrow {
 	return MemoryStream(data);
 }
 
@@ -42,15 +42,17 @@ static auto @safe memoryStream(ubyte[] data) pure nothrow {
  * Params:
  * 	size = Amount of bytes to preallocate.
  */
-static auto @safe memoryStream(size_t size) pure nothrow {
+static auto memoryStream(size_t size) {
 	return MemoryStream(size);
 }
 
 /**
  * Creates a memory stream.
  */
-static @nogc @safe auto memoryStream() pure nothrow {
-	return MemoryStream();
+static auto memoryStream() {
+	import std.typecons: refCounted;
+
+	return refCounted(MemoryStreamBase());
 }
 
 /**
@@ -90,9 +92,11 @@ static auto copyToMemory(Source)(
 /**
  * A read-only memory stream.
  */
-struct ReadOnlyMemoryStream {
+struct ReadOnlyMemoryStreamBase {
 	private size_t _position = 0;
 	private immutable (ubyte)[] _buffer;
+
+	@disable this(this);
 
 	/**
 	 * Creates a read-only memory stream from a byte array.
@@ -194,9 +198,11 @@ struct ReadOnlyMemoryStream {
 /**
  * A mutable memory stream.
  */
-struct MemoryStream {
+struct MemoryStreamBase {
 	private size_t _position = 0;
 	private Appender!(ubyte[]) _buffer;
+
+	@disable this(this);
 
 	/**
 	 * Creates a memory stream based on a byte array.
@@ -328,3 +334,7 @@ struct MemoryStream {
 		_position = pos;
 	}
 }
+
+import std.typecons;
+alias ReadOnlyMemoryStream = RefCounted!(ReadOnlyMemoryStreamBase, RefCountedAutoInitialize.no);
+alias MemoryStream = RefCounted!(MemoryStreamBase, RefCountedAutoInitialize.no);
