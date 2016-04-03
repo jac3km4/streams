@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 	<meta charset="utf-8">
-	<title>streams.data - streams documentation</title>
+	<title>streams.bzip - streams documentation</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -34,7 +34,7 @@
 	
 	<!-- Introduce DDoc settings required by JavaScript -->
 	<script type="text/javascript">
-		var Title = 'streams.data';
+		var Title = 'streams.bzip';
 		var SourceRepository = 'https://github.com/jac3km4/streams/tree/master/source';
 		var PackageSeparator = '.';
 	</script>
@@ -85,7 +85,7 @@
 					</ul>
 					
 					<form id="gotosymbol" class="navbar-search pull-left hidden">
-						<input type="text" class="search-query" placeholder="Go to symbol in streams.data" data-provide="typeahead" data-items="4">
+						<input type="text" class="search-query" placeholder="Go to symbol in streams.bzip" data-provide="typeahead" data-items="4">
 					</form>
 					
 					<p class="navbar-text pull-right"><a href="https://github.com/jac3km4/streams">Github Page</a></p>
@@ -113,7 +113,7 @@
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.endian.html" title="streams.util.endian"><i class="icon-th"></i>streams.util.endian</a></li>
 	<li class="sidebar-list-entry tree-leaf"><a href="streams.util.wrappers.html" title="streams.util.wrappers"><i class="icon-th"></i>streams.util.wrappers</a></li>
 					</noscript>
-					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams.data</li>
+					<li id="symbol-list" class="nav-header sidebar-list-entry hidden">streams.bzip</li>
 				</ul>
 				</div><!--/.well -->
 			</div><!--/span-->
@@ -122,7 +122,7 @@
 				<div class="row-fluid">
 					<div class="span11">
 						<ul id="module-breadcrumb" class="breadcrumb">
-							<noscript><h1>streams.data</h1></noscript>
+							<noscript><h1>streams.bzip</h1></noscript>
 						</ul>
 						
 					</div>
@@ -137,51 +137,63 @@
 
 </dd>
 <dt>Description:</dt><dd>
-This module contains methods which
- allow manipulating binary <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a> in streams.</dd>
+This module provides an interface to read and write bzip2 streams</dd>
 </dl>
-<hr><div class="row-fluid declaration"><h3>T <span class="symbol-target" id="decode">&nbsp;</span><a class="symbol-link" href="#decode">decode</a>(T, Endian e = Endian.littleEndian, Source)(auto ref Source <i>source</i>) if (isSource!Source &amp;&amp; isScalarType!T);
+<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="bzipInputStream">&nbsp;</span><a class="symbol-link" href="#bzipInputStream">bzipInputStream</a>(Stream)(auto ref Stream <i>stream</i>, bool <i>small</i> = false) if (isSource!Stream);
 </h3></div>
-<div class="declaration-content"><dl><p>Decodes a primitive value from a <i>source</i>
- taking care of endianess.
+<div class="declaration-content"><dl><p>Creates an input zlib2 <i>stream</i>.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Source <i>source</i></td>
-<td>Stream to read from.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
+<td>Base <i>stream</i>.</td></tr>
+<tr><td>bool <i>small</i></td>
+<td>Whether the library will use an alternative decompression algorithm
+ 			which uses less memory but at the cost of decompressing more slowly.</td></tr>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="encode">&nbsp;</span><a class="symbol-link" href="#encode">encode</a>(Endian e = Endian.littleEndian, T, Sink)(auto ref Sink <i>sink</i>, T <i>t</i>) if (isSink!Sink &amp;&amp; isScalarType!T);
+<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="bzipOutputStream">&nbsp;</span><a class="symbol-link" href="#bzipOutputStream">bzipOutputStream</a>(Stream)(auto ref Stream <i>stream</i>, BlockSize <i>blockSize</i> = BlockSize.Normal) if (isSink!Stream);
 </h3></div>
-<div class="declaration-content"><dl><p>Encodes a primitive value into a <i>sink</i>
- taking care of endianess.
+<div class="declaration-content"><dl><p>Creates an output zlib2 <i>stream</i>.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Sink <i>sink</i></td>
-<td>Stream to write into.</td></tr>
-<tr><td>T <i>t</i></td>
-<td>Value to <span class="symbol-target" id="encode">&nbsp;</span><a class="symbol-link" href="#encode">encode</a>.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
+<td>Base <i>stream</i>.</td></tr>
+<tr><td>BlockSize <i>blockSize</i></td>
+<td>Block size to be used for compression. It should be a value between 1 and 9 inclusive,
+ 				and the actual block size used is 100000 x this figure.
+ 				9 gives the best compression but takes most memory.</td></tr>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>Struct <span class="symbol-target" id="rawRead">&nbsp;</span><a class="symbol-link" href="#rawRead">rawRead</a>(Struct, Endian e = Endian.littleEndian, Source)(auto ref Source <i>source</i>) if (isSource!Source &amp;&amp; is(Struct == struct));
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="BzipInputStreamBase">&nbsp;</span><a class="symbol-link" href="#BzipInputStreamBase">BzipInputStreamBase</a>(Source) if (isSource!Source);
 </h3></div>
-<div class="declaration-content"><dl><p>Interprets bytes from <i>source</i> as a structure
- taking care of endianess of it's members.
+<div class="declaration-content"><dl><p>bzip2 input stream structure</p>
+</dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Source <i>source</i>, bool <i>small</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Creates an input zlib2 stream.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Source <i>source</i></td>
-<td>Stream to read from.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>stream</td>
+<td>Base stream.</td></tr>
+<tr><td>bool <i>small</i></td>
+<td>Whether the library will use an alternative decompression algorithm
+ 			which uses less memory but at the cost of decompressing more slowly.</td></tr>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="rawWrite">&nbsp;</span><a class="symbol-link" href="#rawWrite">rawWrite</a>(Endian e = Endian.littleEndian, Struct, Sink)(auto ref Sink <i>sink</i>, in Struct <i>s</i>) if (isSink!Sink &amp;&amp; is(Struct == struct));
+<hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>buf</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Encodes a structure as a sequence of bytes
- taking care of endianess of it'<i>s</i> members.
+<div class="declaration-content"><dl><p>Reads and decompresses bytes from a base stream.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Sink <i>sink</i></td>
-<td>Stream to write into.</td></tr>
-<tr><td>Struct <i>s</i></td>
-<td>Structure to encode.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>buf</i></td>
+<td>Byte buffer to <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> into.</td></tr>
 </table></dd>
+</dl>
+</div>
+</div>
+</div>
+<hr><div class="row-fluid declaration"><h3>enum <span class="symbol-target" id="BlockSize">&nbsp;</span><a class="symbol-link" href="#BlockSize">BlockSize</a>: int;
+</h3></div>
+<div class="declaration-content"><dl><p>zlib2 block size</p>
 </dl>
 </div>
 

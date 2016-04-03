@@ -1,1 +1,1 @@
-rdmd bootDoc/generate.d ../source -I~/.dub/packages/io-master/source --extra=index.d
+rdmd bootDoc/generate.d ../source -I~/.dub/packages/io-master/source -I~/.dub/packages/bzip2-0.1.0/source --extra=index.d

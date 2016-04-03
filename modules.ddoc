@@ -1,5 +1,6 @@
 MODULES =
 	$(MODULE streams.package)
+	$(MODULE streams.bzip)
 	$(MODULE streams.data)
 	$(MODULE streams.memory)
 	$(MODULE streams.slice)
