@@ -137,9 +137,9 @@
 <dt>Description:</dt><dd>
 This module provides an interface to read and write Zlib streams</dd>
 </dl>
-<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zlibStream">&nbsp;</span><a class="symbol-link" href="#zlibStream">zlibStream</a>(Stream)(auto ref Stream <i>stream</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT) if (isStream!Stream);
+<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zlibInputStream">&nbsp;</span><a class="symbol-link" href="#zlibInputStream">zlibInputStream</a>(Stream)(auto ref Stream <i>stream</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT) if (isSource!Stream);
 </h3></div>
-<div class="declaration-content"><dl><p>Creates a Zlib <i>stream</i>.
+<div class="declaration-content"><dl><p>Creates an input Zlib <i>stream</i>.
 </p>
 <dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
 <td>Base <i>stream</i>.</td></tr>
@@ -150,12 +150,25 @@ This module provides an interface to read and write Zlib streams</dd>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="zlibStream">&nbsp;</span><a class="symbol-link" href="#zlibStream">zlibStream</a>(in string <i>path</i>, Encoding <i>encoding</i> = Encoding.Guess, int <i>windowBits</i> = WINDOW_BITS_DEFAULT);
+<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zlibOutputStream">&nbsp;</span><a class="symbol-link" href="#zlibOutputStream">zlibOutputStream</a>(Stream)(auto ref Stream <i>stream</i>, CompressionLevel <i>level</i> = CompressionLevel.Normal) if (isSink!Stream);
 </h3></div>
-<div class="declaration-content"><dl><p>Open a file as a Zlib stream.
+<div class="declaration-content"><dl><p>Creates an output Zlib <i>stream</i>.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>string <i>path</i></td>
-<td>File <i>path</i>.</td></tr>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
+<td>Base <i>stream</i>.</td></tr>
+<tr><td>CompressionLevel <i>level</i></td>
+<td>Compression <i>level</i>.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zlibOutputStream">&nbsp;</span><a class="symbol-link" href="#zlibOutputStream">zlibOutputStream</a>(Stream)(auto ref Stream <i>stream</i>, CompressionLevel <i>level</i>, Encoding <i>encoding</i>, int <i>windowBits</i> = WINDOW_BITS_DEFAULT) if (isSink!Stream);
+</h3></div>
+<div class="declaration-content"><dl><p>Creates an output Zlib <i>stream</i>.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
+<td>Base <i>stream</i>.</td></tr>
+<tr><td>CompressionLevel <i>level</i></td>
+<td>Compression <i>level</i>.</td></tr>
 <tr><td>Encoding <i>encoding</i></td>
 <td>Encoding to use.</td></tr>
 <tr><td>int <i>windowBits</i></td>
@@ -163,15 +176,15 @@ This module provides an interface to read and write Zlib streams</dd>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ZlibStreamBase">&nbsp;</span><a class="symbol-link" href="#ZlibStreamBase">ZlibStreamBase</a>(Stream) if (isStream!Stream);
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ZlibInputStreamBase">&nbsp;</span><a class="symbol-link" href="#ZlibInputStreamBase">ZlibInputStreamBase</a>(Source) if (isSource!Source);
 </h3></div>
-<div class="declaration-content"><dl><p>Zlib stream structure</p>
+<div class="declaration-content"><dl><p>Zlib input stream structure</p>
 </dl>
-<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Stream <i>stream</i>, Encoding <i>encoding</i>, int <i>windowBits</i>);
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Source <i>stream</i>, Encoding <i>encoding</i>, int <i>windowBits</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Creates a Zlib <i>stream</i>.
+<div class="declaration-content"><dl><p>Creates an input Zlib <i>stream</i>.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Source <i>stream</i></td>
 <td>Base <i>stream</i>.</td></tr>
 <tr><td>Encoding <i>encoding</i></td>
 <td>Encoding to use.</td></tr>
@@ -180,16 +193,68 @@ This module provides an interface to read and write Zlib streams</dd>
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>chunk</i>);
+<hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a>(ubyte[] <i>buf</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Reads and decodes bytes from a base stream.
+<div class="declaration-content"><dl><p>Reads and decompresses bytes from a base stream.
 </p>
-<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>chunk</i></td>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>buf</i></td>
 <td>Byte buffer to <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> into.</td></tr>
 </table></dd>
 </dl>
 </div>
 </div>
+</div>
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ZlibOutputStreamBase">&nbsp;</span><a class="symbol-link" href="#ZlibOutputStreamBase">ZlibOutputStreamBase</a>(Sink) if (isSink!Sink);
+</h3></div>
+<div class="declaration-content"><dl><p>Zlib output stream structure</p>
+</dl>
+<div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Sink <i>stream</i>, CompressionLevel <i>level</i>, Encoding <i>encoding</i>, int <i>windowBits</i> = WINDOW_BITS_DEFAULT);
+</h3></div>
+<div class="declaration-content"><dl><p>Creates an output Zlib <i>stream</i>.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Sink <i>stream</i></td>
+<td>Base <i>stream</i>.</td></tr>
+<tr><td>CompressionLevel <i>level</i></td>
+<td>Compression <i>level</i>.</td></tr>
+<tr><td>Encoding <i>encoding</i></td>
+<td>Encoding to use.</td></tr>
+<tr><td>int <i>windowBits</i></td>
+<td>Window bits.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>size_t <span class="symbol-target" id="write">&nbsp;</span><a class="symbol-link" href="#write">write</a>(in ubyte[] <i>src</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Writes bytes into a stream.
+</p>
+<dt>Note:</dt><dd>
+this is not guaranteed to immediately
+ <span class="symbol-target" id="write">&nbsp;</span><a class="symbol-link" href="#write">write</a> data into the underlying stream.
+ Only calling flush guarantees that.
+
+</dd>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>src</i></td>
+<td>Bytes to compress.</td></tr>
+</table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="flush">&nbsp;</span><a class="symbol-link" href="#flush">flush</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Finishes writing, pushing all the data into
+ the underlying stream. Closes the stream.</p>
+</dl>
+</div>
+</div>
+</div>
+<hr><div class="row-fluid declaration"><h3>enum <span class="symbol-target" id="Encoding">&nbsp;</span><a class="symbol-link" href="#Encoding">Encoding</a>: int;
+</h3></div>
+<div class="declaration-content"><dl><p>Zlib encoding types</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>enum <span class="symbol-target" id="CompressionLevel">&nbsp;</span><a class="symbol-link" href="#CompressionLevel">CompressionLevel</a>: int;
+</h3></div>
+<div class="declaration-content"><dl><p>Zlib compression levels</p>
+</dl>
 </div>
 
 

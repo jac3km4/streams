@@ -138,7 +138,7 @@
 This module enables you to treat
  chunks of <span class="symbol-target" id="memory">&nbsp;</span><a class="symbol-link" href="#memory">memory</a> as a stream.</dd>
 </dl>
-<hr><div class="row-fluid declaration"><h3>static pure nothrow @nogc @safe auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(immutable(ubyte)[] <i>data</i>);
+<hr><div class="row-fluid declaration"><h3>static nothrow @nogc auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(immutable(ubyte)[] <i>data</i>);
 </h3></div>
 <div class="declaration-content"><dl><p>Creates a read-only memory stream from a byte array.
 </p>
@@ -147,7 +147,7 @@ This module enables you to treat
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>static pure nothrow @safe auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(ubyte[] <i>data</i>);
+<hr><div class="row-fluid declaration"><h3>static nothrow auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(ubyte[] <i>data</i>);
 </h3></div>
 <div class="declaration-content"><dl><p>Creates a memory stream based on a byte array.
 </p>
@@ -156,7 +156,7 @@ This module enables you to treat
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>static pure nothrow @safe auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(size_t <i>size</i>);
+<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>(size_t <i>size</i>);
 </h3></div>
 <div class="declaration-content"><dl><p>Creates a memory stream reserving specified amount of memory.
 </p>
@@ -165,7 +165,7 @@ This module enables you to treat
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>static pure nothrow @nogc @safe auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>();
+<hr><div class="row-fluid declaration"><h3>static auto <span class="symbol-target" id="memoryStream">&nbsp;</span><a class="symbol-link" href="#memoryStream">memoryStream</a>();
 </h3></div>
 <div class="declaration-content"><dl><p>Creates a memory stream.</p>
 </dl>
@@ -184,7 +184,7 @@ This module enables you to treat
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ReadOnlyMemoryStream">&nbsp;</span><a class="symbol-link" href="#ReadOnlyMemoryStream">ReadOnlyMemoryStream</a>;
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ReadOnlyMemoryStreamBase">&nbsp;</span><a class="symbol-link" href="#ReadOnlyMemoryStreamBase">ReadOnlyMemoryStreamBase</a>;
 </h3></div>
 <div class="declaration-content"><dl><p>A read-only memory stream.</p>
 </dl>
@@ -203,16 +203,6 @@ This module enables you to treat
  The number of bytes <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> is returned.</p>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte[]) <span class="symbol-target" id="opSlice">&nbsp;</span><a class="symbol-link" href="#opSlice">opSlice</a>(size_t <i>i</i>, size_t <i>j</i>);
-</h3></div>
-<div class="declaration-content"><dl><p>Returns a slice of the underlying buffer.</p>
-</dl>
-</div>
-<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="opDollar">&nbsp;</span><a class="symbol-link" href="#opDollar">opDollar</a>(size_t dim : 0)();
-</h3></div>
-<div class="declaration-content"><dl><p>Returns length of the underlying buffer.</p>
-</dl>
-</div>
 <hr><div class="row-fluid declaration"><h3>long <span class="symbol-target" id="seekTo">&nbsp;</span><a class="symbol-link" href="#seekTo">seekTo</a>(long <i>offset</i>, From <i>from</i> = From.start);
 </h3></div>
 <div class="declaration-content"><dl><p>Seeks relative to a position.
@@ -222,6 +212,16 @@ This module enables you to treat
 <tr><td>From <i>from</i></td>
 <td>Optional reference point.</td></tr>
 </table></dd>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte[]) <span class="symbol-target" id="opSlice">&nbsp;</span><a class="symbol-link" href="#opSlice">opSlice</a>(size_t <i>i</i>, size_t <i>j</i>);
+</h3></div>
+<div class="declaration-content"><dl><p>Returns a slice of the underlying buffer.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="opDollar">&nbsp;</span><a class="symbol-link" href="#opDollar">opDollar</a>(size_t dim : 0)();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns length of the underlying buffer.</p>
 </dl>
 </div>
 <hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe immutable(ubyte[]) <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a>();
@@ -246,7 +246,7 @@ This module enables you to treat
 </div>
 </div>
 </div>
-<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="MemoryStream">&nbsp;</span><a class="symbol-link" href="#MemoryStream">MemoryStream</a>;
+<hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="MemoryStreamBase">&nbsp;</span><a class="symbol-link" href="#MemoryStreamBase">MemoryStreamBase</a>;
 </h3></div>
 <div class="declaration-content"><dl><p>A mutable memory stream.</p>
 </dl>
@@ -274,14 +274,14 @@ This module enables you to treat
  The number of bytes <span class="symbol-target" id="read">&nbsp;</span><a class="symbol-link" href="#read">read</a> is returned.</p>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>pure nothrow @safe size_t <span class="symbol-target" id="write">&nbsp;</span><a class="symbol-link" href="#write">write</a>(in ubyte[] <i>data</i>);
+<hr><div class="row-fluid declaration"><h3>pure @safe size_t <span class="symbol-target" id="write">&nbsp;</span><a class="symbol-link" href="#write">write</a>(in ubyte[] <i>data</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Appends <i>data</i> to the buffer.
+<div class="declaration-content"><dl><p>Inserts <i>data</i> in the buffer.
 </p>
 <dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>ubyte[] <i>data</i></td>
-<td>Byte array to be appended.</td></tr>
+<td>Byte array to be inserted.</td></tr>
 </table></dd>
-<dt>Returns</dt><dd>The number of bytes that were appended.</dd>
+<dt>Returns</dt><dd>The number of bytes that were inserted.</dd>
 </dl>
 </div>
 <hr><div class="row-fluid declaration"><h3>long <span class="symbol-target" id="seekTo">&nbsp;</span><a class="symbol-link" href="#seekTo">seekTo</a>(long <i>offset</i>, From <i>from</i> = From.start);
@@ -295,11 +295,6 @@ This module enables you to treat
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte)[] <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a>();
-</h3></div>
-<div class="declaration-content"><dl><p>Returns the underlying buffer.</p>
-</dl>
-</div>
 <hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte[]) <span class="symbol-target" id="opSlice">&nbsp;</span><a class="symbol-link" href="#opSlice">opSlice</a>(size_t <i>i</i>, size_t <i>j</i>);
 </h3></div>
 <div class="declaration-content"><dl><p>Returns a slice of the underlying buffer.</p>
@@ -308,6 +303,11 @@ This module enables you to treat
 <hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="opDollar">&nbsp;</span><a class="symbol-link" href="#opDollar">opDollar</a>(size_t dim : 0)();
 </h3></div>
 <div class="declaration-content"><dl><p>Returns length of the underlying buffer.</p>
+</dl>
+</div>
+<hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe const(ubyte)[] <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a>();
+</h3></div>
+<div class="declaration-content"><dl><p>Returns the underlying buffer.</p>
 </dl>
 </div>
 <hr><div class="row-fluid declaration"><h3>pure nothrow @nogc @property @safe size_t <span class="symbol-target" id="length">&nbsp;</span><a class="symbol-link" href="#length">length</a>();
