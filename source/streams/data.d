@@ -19,7 +19,7 @@ private {
 	import streams.util.direct;
 }
 
-private enum doesNeedSwap(Endian e, T) = T.sizeof > 1 && endian != e;
+private enum doesNeedSwap(T, Endian E) = T.sizeof > 1 && endian != E;
 
 /**
  * Decodes a primitive value from a source
@@ -28,7 +28,7 @@ private enum doesNeedSwap(Endian e, T) = T.sizeof > 1 && endian != e;
  * Params:
  * 	source = Stream to read from.
  */
-static T decode(T, Endian e = Endian.littleEndian, Source)(auto ref Source source) if (isSource!Source && isScalarType!T) {
+static T decode(T, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (isSource!Source && isScalarType!T) {
 	static if(isDirectSource!Source) {
 		auto slice = source.directRead(T.sizeof);
 		if(slice.length != T.sizeof)
@@ -41,7 +41,7 @@ static T decode(T, Endian e = Endian.littleEndian, Source)(auto ref Source sourc
 		if(source.read(ptr) != T.sizeof)
 			throw new ReadException("Failed to read enough bytes");
 	}
-	static if(doesNeedSwap!(e, T))
+	static if(doesNeedSwap!(T, E))
 		return swapEndianScalar(t);
 	else
 		return t;
@@ -55,8 +55,8 @@ static T decode(T, Endian e = Endian.littleEndian, Source)(auto ref Source sourc
  * 	sink = Stream to write into.
  * 	t = Value to encode.
  */
-static void encode(Endian e = Endian.littleEndian, T, Sink)(auto ref Sink sink, T t) if (isSink!Sink && isScalarType!T) {
-	static if(doesNeedSwap!(e, T)) {
+static void encode(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, T t) if (isSink!Sink && isScalarType!T) {
+	static if(doesNeedSwap!(T, E)) {
 		T x = swapEndianScalar(t);
 		alias src = x;
 	}
@@ -73,7 +73,7 @@ static void encode(Endian e = Endian.littleEndian, T, Sink)(auto ref Sink sink, 
  * Params:
  * 	source = Stream to read from.
  */
-static Struct rawRead(Struct, Endian e = Endian.littleEndian, Source)(auto ref Source source) if(isSource!Source && is(Struct == struct)) {
+static Struct rawRead(Struct, Endian E = Endian.littleEndian, Source)(auto ref Source source) if(isSource!Source && is(Struct == struct)) {
 	static if(isDirectSource!Source) {
 		auto slice = source.directRead(Struct.sizeof);
 		if(slice.length != Struct.sizeof)
@@ -87,7 +87,7 @@ static Struct rawRead(Struct, Endian e = Endian.littleEndian, Source)(auto ref S
 			throw new ReadException("Failed to read enough bytes");
 		alias res = s;
 	}
-	static if(endian != e)
+	static if(endian != E)
 		swapEndianStruct(res);
 	return res;
 }
@@ -100,8 +100,8 @@ static Struct rawRead(Struct, Endian e = Endian.littleEndian, Source)(auto ref S
  * 	sink = Stream to write into.
  * 	s = Structure to encode.
  */
-static void rawWrite(Endian e = Endian.littleEndian, Struct, Sink)(auto ref Sink sink, in Struct s) if(isSink!Sink && is(Struct == struct)) {
-	static if(endian != e) {
+static void rawWrite(Struct, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, in Struct s) if(isSink!Sink && is(Struct == struct)) {
+	static if(endian != E) {
 		scope auto copy = s;
 		swapEndianStruct(copy);
 		alias src = copy;

@@ -302,7 +302,7 @@ unittest {
 		auto mem = memoryStream();
 		auto bzipOut = bzipOutputStream(mem);
 		bzipOut.encode(12345);
-		bzipOut.encode!(Endian.bigEndian, float)(12.3f);
+		bzipOut.encode!(float, Endian.bigEndian)(12.3f);
 		bzipOut.flush();
 		// read
 		mem.seekTo(0);

@@ -364,7 +364,6 @@ alias ZlibOutputStream(Stream) = RefCounted!(ZlibOutputStreamBase!Stream, RefCou
 unittest {
 	import streams.memory;
 	{
-
 		// this is zlib encoded string "drocks"
 		immutable(ubyte)[] raw = [0x78,0x9C,0x4B,0x29,0xCA,0x4F,0xCE,0x2E,0x06,0x00,0x08,0xC6,0x02,0x87];
 		auto mem = memoryStream(raw);
