@@ -252,6 +252,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 
 		if(!_init)
 			throw new ZlibException("Cannot flush a closed stream");
+
 		with(_zStream) {
 			avail_in = 0;
 			next_in = null;
@@ -274,7 +275,6 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink) {
 			auto length = _buffer.length - _zStream.avail_out;
 			if(length > 0)
 				base.writeExactly(_buffer[0..length]);
-
 		}
 	}
 }
