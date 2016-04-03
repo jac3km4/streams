@@ -127,6 +127,9 @@ struct BzipInputStreamBase(Source) if (isSource!Source) {
 }
 
 
+/**
+ * bzip2 output stream structure
+ */
 struct BzipOutputStreamBase(Sink) if (isSink!Sink) {
 	Sink base;
 	private bool _init = false;
@@ -288,5 +291,23 @@ unittest {
 		assert(buf[] == str[]);
 		// we should be on the end of the stream
 		assert(mem.position == mem.length);
+	}
+
+	{
+		import std.system: Endian;
+
+		import streams.memory;
+		import streams.data;
+
+		auto mem = memoryStream();
+		auto bzipOut = bzipOutputStream(mem);
+		bzipOut.encode(12345);
+		bzipOut.encode!(Endian.bigEndian, float)(12.3f);
+		bzipOut.flush();
+		// read
+		mem.seekTo(0);
+		auto bzipIn = bzipInputStream(mem);
+		assert(bzipIn.decode!int == 12345);
+		assert(bzipIn.decode!(float, Endian.bigEndian) == 12.3f);
 	}
 }
