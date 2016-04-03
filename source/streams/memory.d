@@ -77,7 +77,7 @@ static auto copyToMemory(Source)(
 	else static if(isSeekable!Source) {
 		ubyte[] buf;
 		if(upTo == -1)
-			buf = source.readAll();
+			buf = cast(immutable(ubyte)[])source.readAll();
 		else buf = cast(immutable(ubyte)[])source.readAll(upTo);
 		alias bytes = buf;
 	} else {
