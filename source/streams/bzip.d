@@ -280,14 +280,14 @@ unittest {
 
 		auto str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
 		auto mem = memoryStream();
-		auto zlibOut = bzipOutputStream(mem);
-		zlibOut.writeExactly(str);
-		zlibOut.flush();
+		auto bzipOut = bzipOutputStream(mem);
+		bzipOut.writeExactly(str);
+		bzipOut.flush();
 		// and read it...
 		mem.seekTo(0);
-		auto zlibIn = bzipInputStream(mem);
+		auto bzipIn = bzipInputStream(mem);
 		auto buf = new char[str.length];
-		zlibIn.readExactly(buf);
+		bzipIn.readExactly(buf);
 		assert(buf[] == str[]);
 		// we should be on the end of the stream
 		assert(mem.position == mem.length);
