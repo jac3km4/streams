@@ -1,6 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"io": "~master"
+		"io": "~master",
+		"bzip2": "0.1.0"
 	}
 }
