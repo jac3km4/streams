@@ -64,11 +64,19 @@ struct LocalFileHeader
 
         private align(1) struct Flags
         {
-            mixin(bitfields!(bool, "encrypted", 1, bool, "bit1", 1, bool,
-                "bit2", 1, bool, "unsetSize", 1, bool, "enhancedDeflating", 1,
-                bool, "compressedPatchedData", 1, bool, "strongEncryption", 1,
-                int, "", 4, bool, "efs", 1, bool, "enhancedCompression", 1,
-                bool, "encryptedCentralDir", 1, int, "", 2));
+            mixin(bitfields!(
+                bool, "encrypted", 1,
+                bool, "bit1", 1,
+                bool, "bit2", 1,
+                bool, "unsetSize", 1,
+                bool, "enhancedDeflating", 1,
+                bool, "compressedPatchedData", 1,
+                bool, "strongEncryption", 1,
+                int, "", 4,
+                bool, "efs", 1,
+                bool, "enhancedCompression", 1,
+                bool, "encryptedCentralDir", 1,
+                int, "", 2));
         }
     }
 }
