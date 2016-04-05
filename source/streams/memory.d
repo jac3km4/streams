@@ -82,7 +82,7 @@ static auto copyToMemory(Source)(auto ref Source source, size_t upTo = -1,
     }
     else static if (isSeekable!Source)
     {
-        ubyte[] buf;
+        immutable(ubyte)[] buf;
         if (upTo == -1)
             buf = cast(immutable(ubyte)[]) source.readAll();
         else

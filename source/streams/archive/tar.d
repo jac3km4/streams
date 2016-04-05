@@ -54,7 +54,7 @@ struct TarArchiveBase(Stream) if (isStream!Stream)
         _stream = stream;
     }
 
-    ByEntry byEntry()
+    auto byEntry()
     {
         return ByEntry(_stream);
     }

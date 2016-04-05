@@ -401,7 +401,7 @@ private template InputStreamType(Stream)
     static if (isDirectSource!Stream)
         alias type = RefCounted!(ZlibInputStreamBase!Stream, RefCountedAutoInitialize.no);
     else
-        alias type = RefCounted!(FixedBuffer!(ZlibStreamBase!Stream), RefCountedAutoInitialize.no);
+        alias type = RefCounted!(FixedBuffer!(ZlibInputStreamBase!Stream), RefCountedAutoInitialize.no);
 }
 
 alias ZlibInputStream(Stream) = InputStreamType!(Stream).type;
