@@ -189,9 +189,9 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
 	 * Params:
 	 * 	stream = Stream to read archive from
 	 */
-    this()(auto ref Stream stream)
+    this()(auto ref Stream s)
     {
-        this.stream = stream;
+        this.stream = s;
         readCentralDirectory();
     }
 
@@ -234,8 +234,8 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
 
     GenericSource openFile(ref FileHeader header)
     {
-        import streams.zlib;
-        import streams.bzip;
+        import streams.zlib : zlibInputStream;
+        import streams.bzip : bzipInputStream;
 
         stream.seekTo(header.relativeOffsetOfLocalHeader);
         if (stream.decode!uint != LocalFileHeader.signature)
@@ -419,6 +419,6 @@ unittest
 {
     ubyte[] cps = [0xf6, 'a', 0xe6, 'b', 0xad, 'c'];
     // this is CP437 encoded - DIVISION SIGN, 'a', MICRO SIGN, 'b', INVERTED EXCLAMATION MARK, 'c'
-    auto str = cp437toUtf8(cps);
+    immutable str = cp437toUtf8(cps);
     assert(str == "÷aµb¡c");
 }

@@ -11,6 +11,7 @@ module streams.memory;
 private
 {
     import std.array : appender, Appender;
+	import std.conv: to;
 
     import io.stream;
 
@@ -151,13 +152,13 @@ struct ReadOnlyMemoryStreamBase
         switch (from)
         {
         case From.start:
-            _position = offset;
+            _position = to!size_t(offset);
             break;
         case From.here:
             _position += offset;
             break;
         case From.end:
-            _position = _buffer.length + offset;
+            _position = to!size_t(_buffer.length + offset);
             break;
         default:
         }
@@ -310,13 +311,13 @@ struct MemoryStreamBase
         switch (from)
         {
         case From.start:
-            _position = offset;
+            _position = to!size_t(offset);
             break;
         case From.here:
             _position += offset;
             break;
         case From.end:
-            _position = data.length + offset;
+            _position = to!size_t(data.length + offset);
             break;
         default:
         }

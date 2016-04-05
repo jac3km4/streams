@@ -19,7 +19,7 @@ private
  */
 struct TARFileHeader
 {
-    ubyte[100] filename;
+    ubyte[100] fileName;
     ubyte[8] mode;
     ubyte[8] uid;
     ubyte[8] gid;
@@ -28,7 +28,6 @@ struct TARFileHeader
     ubyte[8] checksum;
     ubyte typeFlag;
     ubyte[100] linkedFileName;
-    //USTar-specific fields -- NUL-filled in non-USTAR version
     ubyte[6] ustarIndicator;
     ubyte[2] ustarVersion;
     ubyte[32] ownerUserName;
@@ -36,7 +35,7 @@ struct TARFileHeader
     ubyte[8] deviceMajorNumber;
     ubyte[8] deviceMinorNumber;
     ubyte[155] filenamePrefix;
-    ubyte[12] padding; //Nothing of interest, but relevant for checksum
+    ubyte[12] padding;
 }
 
 static auto tarArchive(Stream)(auto ref Stream stream) if (isStream!Stream)
@@ -44,8 +43,10 @@ static auto tarArchive(Stream)(auto ref Stream stream) if (isStream!Stream)
     return TarArchive!Stream(stream);
 }
 
-struct TarArchiveBase(Stream) if (isStream!Stream && isSeekable!Stream)
+struct TarArchiveBase(Stream) if (isStream!Stream)
 {
+    static assert(isSeekable!Stream, "Stream must be seekable");
+    
     private Stream _stream;
 
     this()(auto ref Stream stream)
@@ -79,8 +80,6 @@ struct TarArchiveBase(Stream) if (isStream!Stream && isSeekable!Stream)
         void popFront()
         {
             import std.algorithm : all;
-            import std.string : fromStringz;
-            import std.stdio : writeln;
 
             ubyte[512] buffer;
             _stream.readExactly(buffer);
@@ -115,7 +114,7 @@ struct TarArchiveBase(Stream) if (isStream!Stream && isSeekable!Stream)
                 _header = header;
             }
 
-            @property @safe @nogc size_t length() pure nothrow const
+            @property @safe @nogc size_t length() pure nothrow
             {
                 auto str = _header.fileSize;
                 size_t size = 0;
@@ -125,11 +124,11 @@ struct TarArchiveBase(Stream) if (isStream!Stream && isSeekable!Stream)
                 return size;
             }
 
-            @property const(char)[] fileName() pure nothrow const
+            @property const(char)[] fileName() pure nothrow
             {
                 import std.string : fromStringz;
 
-                return fromStringz(cast(char*) _header.filename);
+                return fromStringz(cast(char*) _header.fileName);
             }
 
             auto openReader()
@@ -141,4 +140,5 @@ struct TarArchiveBase(Stream) if (isStream!Stream && isSeekable!Stream)
 }
 
 import std.typecons;
+
 alias TarArchive(Stream) = RefCounted!(TarArchiveBase!Stream, RefCountedAutoInitialize.no);
