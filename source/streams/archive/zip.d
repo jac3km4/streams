@@ -21,9 +21,26 @@ private
     import streams.util.wrappers;
 }
 
+private align(1) struct GeneralFlags
+{
+    mixin(bitfields!(
+        bool, "encrypted", 1,
+        bool, "bit1", 1,
+        bool, "bit2", 1,
+        bool, "dataDescriptor", 1,
+        bool, "enhancedDeflation", 1,
+        bool, "compressedPatchedData", 1,
+        bool, "strongEncryption", 1,
+        int, "", 4,
+        bool, "efs", 1,
+        bool, "", 1,
+        bool, "maskHeaderValues", 1,
+        int, "", 2));
+}
+
 struct LocalFileHeader
 {
-    private enum uint signature = 0x04034b50;
+    package enum uint signature = 0x04034b50;
 
     RawData data;
     alias data this;
@@ -52,7 +69,7 @@ struct LocalFileHeader
     {
     align(1):
         ushort versionRequired;
-        Flags flags;
+        GeneralFlags flags;
         ushort compressionMethod;
         ushort modificationTime;
         ushort modificationDate;
@@ -62,28 +79,12 @@ struct LocalFileHeader
         ushort fileNameLength;
         ushort extraFieldLength;
 
-        private align(1) struct Flags
-        {
-            mixin(bitfields!(
-                bool, "encrypted", 1,
-                bool, "bit1", 1,
-                bool, "bit2", 1,
-                bool, "unsetSize", 1,
-                bool, "enhancedDeflating", 1,
-                bool, "compressedPatchedData", 1,
-                bool, "strongEncryption", 1,
-                int, "", 4,
-                bool, "efs", 1,
-                bool, "enhancedCompression", 1,
-                bool, "encryptedCentralDir", 1,
-                int, "", 2));
-        }
     }
 }
 
 struct FileHeader
 {
-    private enum uint signature = 0x02014b50;
+    package enum uint signature = 0x02014b50;
 
     RawData data;
     alias data this;
@@ -118,7 +119,7 @@ struct FileHeader
         ubyte zipVersion;
         ubyte fileAttribute;
         ushort extractVersion;
-        ushort flags;
+        GeneralFlags flags;
         ushort compressionMethod;
         ushort modificationTime;
         ushort modificationDate;
@@ -137,7 +138,7 @@ struct FileHeader
 
 struct EndOfCentralDirRecord
 {
-    private enum uint signature = 0x06054b50;
+    package enum uint signature = 0x06054b50;
     RawData data;
     alias data this;
 
@@ -180,8 +181,8 @@ auto zipArchive(Stream)(auto ref Stream s) if (isStream!Stream && isSeekable!Str
  */
 struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
 {
-    private Stream stream;
-    FileHeader[] headers;
+    private Stream _stream;
+    private FileHeader[] _headers;
 
     /**
 	 * Opens an existing zip archive from a stream
@@ -189,19 +190,19 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
 	 * Params:
 	 * 	stream = Stream to read archive from
 	 */
-    this()(auto ref Stream s)
+    this()(auto ref Stream stream)
     {
-        this.stream = s;
+        _stream = stream;
         readCentralDirectory();
     }
 
     private void readCentralDirectory()
     {
         auto eocd = readEocdRecord();
-        headers = new FileHeader[eocd.entriesInCentralDir];
-        stream.seekTo(eocd.offsetOfCentralDirFromStartingDisk);
-        auto mem = stream.copyToMemory(eocd.sizeOfCentralDir);
-        foreach (i, ref header; headers)
+        _headers = new FileHeader[eocd.entriesInCentralDir];
+        _stream.seekTo(eocd.offsetOfCentralDirFromStartingDisk);
+        auto mem = _stream.copyToMemory(eocd.sizeOfCentralDir);
+        foreach (i, ref header; _headers)
         {
             if (mem.decode!uint != FileHeader.signature)
                 throw new ZipException("Invalid file header signature");
@@ -212,10 +213,10 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
     private EndOfCentralDirRecord readEocdRecord()
     {
         enum maxOffset = uint.sizeof + EndOfCentralDirRecord.RawData.sizeof + ushort.max;
-        size_t blockSize = min(maxOffset, stream.length);
-        stream.seekTo(-blockSize, From.end);
+        size_t blockSize = min(maxOffset, _stream.length);
+        _stream.seekTo(-blockSize, From.end);
         auto block = uninitializedArray!(ubyte[])(blockSize);
-        stream.readExactly(block);
+        _stream.readExactly(block);
         if (blockSize >= EndOfCentralDirRecord.RawData.sizeof)
         {
             for (size_t i = blockSize - EndOfCentralDirRecord.RawData.sizeof; i >= 0;
@@ -224,6 +225,7 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
                 if (*(cast(uint*)(block.ptr + i)) == EndOfCentralDirRecord.signature)
                 {
                     auto mem = memoryStream(block[i + 4 .. $]);
+                    EndOfCentralDirRecord eocd;
                     eocd.read(mem);
                     return eocd;
                 }
@@ -232,27 +234,53 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
         throw new ZipException("End of Central Directory record not found");
     }
 
-    GenericSource openFile(ref FileHeader header)
+    @nogc @safe @property auto entries() pure nothrow
     {
-        import streams.zlib : zlibInputStream;
-        import streams.bzip : bzipInputStream;
+        import std.algorithm : map;
 
-        stream.seekTo(header.relativeOffsetOfLocalHeader);
-        if (stream.decode!uint != LocalFileHeader.signature)
-            throw new ZipException("Invalid local file header signature");
-        LocalFileHeader local;
-        local.read(stream);
-        auto slice = sliceStream(stream, stream.position, header.compressedSize);
-        switch (header.compressionMethod)
+        return _headers.map!(header => ZipEntry(_stream, header));
+    }
+
+    struct ZipEntry
+    {
+        private Stream _stream;
+        private FileHeader _header;
+
+        @property const(char[]) fileName()
         {
-        case 0:
-            return wrapSource(slice);
-        case 8:
-            return wrapSource(zlibInputStream(slice, Encoding.None));
-        case 12:
-            return wrapSource(bzipInputStream(slice));
-        default:
-            throw new ZipException("Unsupported compression method");
+            if (_header.flags.efs)
+            {
+                return cast(char[]) _header.fileName;
+            }
+            else
+            {
+                return cp437toUtf8(_header.fileName);
+            }
+        }
+
+        auto openReader()
+        {
+            import streams.zlib;
+            import streams.bzip;
+
+            _stream.seekTo(_header.relativeOffsetOfLocalHeader);
+            if (_stream.decode!uint != LocalFileHeader.signature)
+                throw new ZipException("Invalid local file header signature");
+            LocalFileHeader local;
+            local.read(_stream);
+            auto slice = sliceStream(_stream, _stream.position, _header.compressedSize);
+            switch (_header.compressionMethod)
+            {
+            case 0:
+                return wrapSource(slice);
+            case 8:
+                return wrapSource(zlibInputStream(slice, Encoding.None));
+            case 12:
+                return wrapSource(bzipInputStream(slice));
+            default:
+                throw new ZipException("Unsupported compression method");
+            }
+
         }
     }
 }
@@ -265,7 +293,7 @@ class ZipException : Exception
     }
 }
 
-string cp437toUtf8(ubyte[] bytes)
+char[] cp437toUtf8(ubyte[] bytes)
 {
     /*
 	 * we check if the buffer contains special
@@ -277,7 +305,7 @@ string cp437toUtf8(ubyte[] bytes)
         if (bytes[i] > 127)
             highCodes++;
     if (highCodes == 0)
-        return (cast(char[]) bytes).idup;
+        return cast(char[]) bytes;
     /*
 	 * copy bytes one by one, or two in case
 	 * of a special codepoint
@@ -297,7 +325,7 @@ string cp437toUtf8(ubyte[] bytes)
             j++;
         }
     }
-    return cast(string) buffer;
+    return buffer;
 }
 
 string cp437toUtf8(ubyte code)
@@ -419,6 +447,6 @@ unittest
 {
     ubyte[] cps = [0xf6, 'a', 0xe6, 'b', 0xad, 'c'];
     // this is CP437 encoded - DIVISION SIGN, 'a', MICRO SIGN, 'b', INVERTED EXCLAMATION MARK, 'c'
-    immutable str = cp437toUtf8(cps);
+    const str = cp437toUtf8(cps);
     assert(str == "÷aµb¡c");
 }
