@@ -38,9 +38,9 @@ private align(1) struct GeneralFlags
         int, "", 2));
 }
 
-struct LocalFileHeader
+private struct LocalFileHeader
 {
-    package enum uint signature = 0x04034b50;
+    enum uint signature = 0x04034b50;
 
     RawData data;
     alias data this;
@@ -82,9 +82,9 @@ struct LocalFileHeader
     }
 }
 
-struct FileHeader
+private struct FileHeader
 {
-    package enum uint signature = 0x02014b50;
+    enum uint signature = 0x02014b50;
 
     RawData data;
     alias data this;
@@ -136,9 +136,10 @@ struct FileHeader
     }
 }
 
-struct EndOfCentralDirRecord
+private struct EndOfCentralDirRecord
 {
-    package enum uint signature = 0x06054b50;
+    enum uint signature = 0x06054b50;
+    
     RawData data;
     alias data this;
 
