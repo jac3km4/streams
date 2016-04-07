@@ -21,6 +21,7 @@ private
  * 
  * Returns: Scalar value with reversed bytes.
  */
+pragma(inline):
 @nogc T swapEndianScalar(T)(T t) pure nothrow if (isScalarType!T)
 {
     auto dst = cast(ubyte*)&t;
@@ -39,6 +40,7 @@ private
  * Params:
  * 	s = Structure reference.
  */
+pragma(inline):
 @nogc void swapEndianStruct(Struct)(ref Struct s) pure nothrow if (is(Struct == struct))
 {
     foreach (i, type; Fields!Struct)

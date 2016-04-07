@@ -124,6 +124,7 @@ struct ReadOnlyMemoryStreamBase
 	 * Reads bytes into the specified buffer.
 	 * The number of bytes read is returned.
 	 */
+pragma(inline):
     @nogc @safe size_t read(ubyte[] buf) pure nothrow
     {
         immutable remaining = _buffer.length - _position;
@@ -147,6 +148,7 @@ struct ReadOnlyMemoryStreamBase
 	 *   offset = Offset relative to a reference point.
 	 *   from   = Optional reference point.
 	 */
+pragma(inline):
     long seekTo(long offset, From from = From.start)
     {
         switch (from)
@@ -172,6 +174,7 @@ struct ReadOnlyMemoryStreamBase
     /**
 	 * Returns a slice of the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow
     {
         return _buffer[i .. j];
@@ -179,6 +182,7 @@ struct ReadOnlyMemoryStreamBase
     /**
 	 * Returns length of the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property size_t opDollar(size_t dim : 0)() pure nothrow
     {
         return length;
@@ -187,6 +191,7 @@ struct ReadOnlyMemoryStreamBase
     /**
 	 * Returns the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property immutable(ubyte[]) data() pure nothrow
     {
         return _buffer;
@@ -195,6 +200,7 @@ struct ReadOnlyMemoryStreamBase
     /**
 	 * Returns length of the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property size_t length() pure nothrow
     {
         return _buffer.length;
@@ -203,6 +209,7 @@ struct ReadOnlyMemoryStreamBase
     /**
 	 * Returns current position in the stream.
 	 */
+pragma(inline):
     @nogc @safe @property size_t position() pure nothrow
     {
         return _position;
@@ -211,6 +218,7 @@ struct ReadOnlyMemoryStreamBase
     /**
 	 * Sets position in the stream.
 	 */
+pragma(inline):
     @nogc @safe @property void position(size_t pos) pure nothrow
     {
         _position = pos;
@@ -253,6 +261,7 @@ struct MemoryStreamBase
 	 * Reads bytes into the specified buffer.
 	 * The number of bytes read is returned.
 	 */
+pragma(inline):
     @nogc @safe size_t read(ubyte[] buf) pure nothrow
     {
         auto data = _buffer.data;
@@ -305,6 +314,7 @@ struct MemoryStreamBase
 	 *   offset = Offset relative to a reference point.
 	 *   from   = Optional reference point.
 	 */
+pragma(inline):
     long seekTo(long offset, From from = From.start)
     {
         const data = _buffer.data;
@@ -331,6 +341,7 @@ struct MemoryStreamBase
     /**
 	 * Returns a slice of the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow
     {
         return _buffer.data[i .. j];
@@ -338,6 +349,7 @@ struct MemoryStreamBase
     /**
 	 * Returns length of the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property size_t opDollar(size_t dim : 0)() pure nothrow
     {
         return length;
@@ -346,6 +358,7 @@ struct MemoryStreamBase
     /**
 	 * Returns the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property const(ubyte)[] data() pure nothrow
     {
         return _buffer.data;
@@ -354,6 +367,7 @@ struct MemoryStreamBase
     /**
 	 * Returns length of the underlying buffer.
 	 */
+pragma(inline):
     @nogc @safe @property size_t length() pure nothrow
     {
         return _buffer.data.length;
@@ -362,6 +376,7 @@ struct MemoryStreamBase
     /**
 	 * Returns current position in the stream.
 	 */
+pragma(inline):
     @nogc @safe @property size_t position() pure nothrow
     {
         return _position;
@@ -370,6 +385,7 @@ struct MemoryStreamBase
     /**
 	 * Sets position in the stream.
 	 */
+pragma(inline):
     @nogc @safe @property void position(size_t pos) pure nothrow
     {
         _position = pos;

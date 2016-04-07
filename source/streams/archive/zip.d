@@ -377,6 +377,7 @@ static char[] cp437toUtf8(ubyte[] bytes)
 /**
  * Converts CP437 encoded byte to UTF-8 codepoint(s);
  */
+pragma(inline):
 static string cp437toUtf8(ubyte code)
 {
     switch (code)

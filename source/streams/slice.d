@@ -57,6 +57,7 @@ struct SliceStreamBase(Source) if (isSource!Source)
 	 * from the underlying stream.
 	 * The number of bytes read is returned.
 	 */
+pragma(inline):
     size_t read(ubyte[] buf)
     {
         if (_position >= _length)
@@ -75,8 +76,9 @@ struct SliceStreamBase(Source) if (isSource!Source)
     {
         /**
 		 * Returns a slice of the underyling
-		 * stream's buffer (if it allows such operation)..
+		 * stream's buffer (if it allows such operation).
 		 */
+    pragma(inline):
         @nogc @safe @property const(ubyte[]) opSlice(size_t i, size_t j) pure nothrow
         {
             return base[_start + i .. _start + j];
@@ -85,6 +87,7 @@ struct SliceStreamBase(Source) if (isSource!Source)
         /**
 		 * Returns length of the underlying buffer.
 		 */
+    pragma(inline):
         @nogc @safe @property size_t opDollar(size_t dim : 0)() pure nothrow
         {
             return length;
@@ -94,6 +97,7 @@ struct SliceStreamBase(Source) if (isSource!Source)
     /**
 	 * Returns length of the slice.
 	 */
+pragma(inline):
     @nogc @safe @property size_t length() pure nothrow
     {
         return _length;
@@ -102,14 +106,16 @@ struct SliceStreamBase(Source) if (isSource!Source)
     /**
 	 * Returns current position in the slice.
 	 */
+pragma(inline):
     @nogc @safe @property size_t position() pure nothrow
     {
         return _position;
     }
 
     /**
-	 * Sets position in the slice..
+	 * Sets position in the slice.
 	 */
+pragma(inline):
     @nogc @safe @property void position(size_t pos) pure nothrow
     {
         _position = pos;

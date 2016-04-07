@@ -29,6 +29,7 @@ private enum doesNeedSwap(T, Endian E) = T.sizeof > 1 && endian != E;
  * Params:
  * 	source = Stream to read from.
  */
+pragma(inline):
 T decode(T, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
         isSource!Source && isScalarType!T)
 {
@@ -61,6 +62,7 @@ T decode(T, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
  * 	sink = Stream to write into.
  * 	t = Value to encode.
  */
+pragma(inline):
 void encode(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, T t) if (
         isSink!Sink && isScalarType!T)
 {
@@ -83,6 +85,7 @@ void encode(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, T t) if
  * Params:
  * 	source = Stream to read from.
  */
+pragma(inline):
 Struct rawRead(Struct, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
         isSource!Source && is(Struct == struct))
 {
@@ -115,6 +118,7 @@ Struct rawRead(Struct, Endian E = Endian.littleEndian, Source)(auto ref Source s
  * 	sink = Stream to write into.
  * 	s = Structure to encode.
  */
+pragma(inline):
 void rawWrite(Struct, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, in Struct s) if (
         isSink!Sink && is(Struct == struct))
 {

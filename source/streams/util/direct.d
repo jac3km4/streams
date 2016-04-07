@@ -24,6 +24,7 @@ enum isDirectSource(Source) = is(typeof({
  * If remaining bytes is less than size, then a
  * smaller slice is returned.
  */
+pragma(inline):
 const(ubyte[]) directRead(Source)(auto ref Source source, size_t size) if (isDirectSource!Source)
 {
     auto pos = source.position;
