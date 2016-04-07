@@ -29,7 +29,7 @@ auto bzipInputStream(Stream)(auto ref Stream stream, bool small = false) if (isS
 {
     auto s = BzipInputStream!Stream(stream, small);
     static if (!isDirectSource!Stream)
-        s.bufferSizeb = bzipBufferSize;
+        s.bufferSize = bzipBufferSize;
     return s;
 }
 
