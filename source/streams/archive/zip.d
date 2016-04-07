@@ -171,6 +171,12 @@ private struct EndOfCentralDirRecord
     }
 }
 
+/**
+ * Opens an existing zip archive from a stream.
+ *
+ * Params:
+ * 	stream = Stream to read the archive from.
+ */
 auto zipArchiveReader(Stream)(auto ref Stream s) if (isStream!Stream && isSeekable!Stream)
 {
     return ZipArchiveReader!Stream(s);
@@ -185,10 +191,10 @@ struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
     private FileHeader[] _headers;
 
     /**
-	 * Opens an existing zip archive from a stream
+	 * Opens an existing zip archive from a stream.
 	 *
 	 * Params:
-	 * 	stream = Stream to read archive from
+	 * 	stream = Stream to the read archive from.
 	 */
     this()(auto ref Stream stream)
     {
