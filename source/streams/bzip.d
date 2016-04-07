@@ -15,7 +15,7 @@ private
     import streams.util.direct;
 }
 
-enum BZIP_BUFFER_SIZE = 8 * 1024;
+enum bzipBufferSize = 8 * 1024;
 
 /**
  * Creates an input zlib2 stream.
@@ -29,7 +29,7 @@ auto bzipInputStream(Stream)(auto ref Stream stream, bool small = false) if (isS
 {
     auto s = BzipInputStream!Stream(stream, small);
     static if (!isDirectSource!Stream)
-        s.bufferSize = BZIP_BUFFER_SIZE;
+        s.bufferSizeb = bzipBufferSize;
     return s;
 }
 
@@ -56,7 +56,11 @@ struct BzipInputStreamBase(Source) if (isSource!Source)
     Source base;
     private bz_stream _bzStream;
     private bool _init = false;
-    private ubyte[] _buffer;
+
+    static if (!_isDirect)
+        private ubyte[] _buffer;
+
+    private enum _isDirect = isDirectSource!Source;
 
     @disable this(this);
 
@@ -82,7 +86,8 @@ struct BzipInputStreamBase(Source) if (isSource!Source)
         if (res != BZ_OK)
             throw new BzipException(res);
         base = source;
-        _buffer = new ubyte[BZIP_BUFFER_SIZE];
+        static if (!_isDirect)
+            _buffer = new ubyte[bzipBufferSize];
         _init = true;
     }
 
@@ -111,11 +116,22 @@ struct BzipInputStreamBase(Source) if (isSource!Source)
         {
             if (_bzStream.avail_in == 0)
             {
-                auto len = base.read(_buffer);
-                if (len == 0)
-                    return 0;
-                _bzStream.avail_in = to!uint(len);
-                _bzStream.next_in = _buffer.ptr;
+                static if (_isDirect)
+                {
+                    auto slice = base.directRead(bzipBufferSize);
+                    if (slice.length == 0)
+                        return 0;
+                    _bzStream.avail_in = to!uint(slice.length);
+                    _bzStream.next_in = cast(ubyte*) slice.ptr;
+                }
+                else
+                {
+                    auto len = base.read(_buffer);
+                    if (len == 0)
+                        return 0;
+                    _bzStream.avail_in = to!uint(len);
+                    _bzStream.next_in = cast(ubyte*) _buffer.ptr;
+                }
             }
             auto res = BZ2_bzDecompress(&_bzStream);
             switch (res)
@@ -172,7 +188,7 @@ struct BzipOutputStreamBase(Sink) if (isSink!Sink)
         if (res != BZ_OK)
             throw new BzipException(res);
         base = sink;
-        _buffer = new ubyte[BZIP_BUFFER_SIZE];
+        _buffer = new ubyte[bzipBufferSize];
         _init = true;
     }
 
@@ -303,15 +319,15 @@ class BzipException : Exception
 import std.typecons;
 import io.buffer : FixedBuffer;
 
-private template InputStreamType(Stream)
+private template GetInputStreamType(Stream)
 {
     static if (isDirectSource!Stream)
-        alias InputStreamType = BzipInputStreamBase!Stream;
+        alias GetInputStreamType = BzipInputStreamBase!Stream;
     else
-        alias InputStreamType = FixedBuffer!(BzipInputStreamBase!Stream);
+        alias GetInputStreamType = FixedBuffer!(BzipInputStreamBase!Stream);
 }
 
-alias BzipInputStream(Stream) = RefCounted!(InputStreamType!(Stream), RefCountedAutoInitialize.no);
+alias BzipInputStream(Stream) = RefCounted!(GetInputStreamType!Stream, RefCountedAutoInitialize.no);
 
 alias BzipOutputStream(Stream) = RefCounted!(BzipOutputStreamBase!Stream,
     RefCountedAutoInitialize.no);

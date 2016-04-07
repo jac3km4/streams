@@ -16,9 +16,9 @@ private
     import streams.util.direct;
 }
 
-private enum WINDOW_BITS_DEFAULT = 15;
+private enum windowBitsDefault = 15;
 
-enum ZLIB_BUFFER_SIZE = 256 * 1024;
+enum zlibBufferSize = 256 * 1024;
 
 /**
  * Creates an input Zlib stream.
@@ -29,11 +29,11 @@ enum ZLIB_BUFFER_SIZE = 256 * 1024;
  * 	windowBits = Window bits.
  */
 auto zlibInputStream(Stream)(auto ref Stream stream,
-    Encoding encoding = Encoding.Guess, int windowBits = WINDOW_BITS_DEFAULT) if (isSource!Stream)
+    Encoding encoding = Encoding.Guess, int windowBits = windowBitsDefault) if (isSource!Stream)
 {
     auto s = ZlibInputStream!Stream(stream, encoding, windowBits);
     static if (!isDirectSource!Stream)
-        s.bufferSize = ZLIB_BUFFER_SIZE;
+        s.bufferSize = zlibBufferSize;
     return s;
 }
 
@@ -60,7 +60,7 @@ auto zlibOutputStream(Stream)(auto ref Stream stream,
  * 	windowBits = Window bits.
  */
 auto zlibOutputStream(Stream)(auto ref Stream stream, CompressionLevel level,
-    Encoding encoding, int windowBits = WINDOW_BITS_DEFAULT) if (isSink!Stream)
+    Encoding encoding, int windowBits = windowBitsDefault) if (isSink!Stream)
 {
     return ZlibOutputStream!Stream(stream, level, encoding, windowBits);
 }
@@ -128,7 +128,7 @@ struct ZlibInputStreamBase(Source) if (isSource!Source)
             throw new ZlibException(res);
         base = stream;
         static if (!_isDirect)
-            _buffer = new ubyte[ZLIB_BUFFER_SIZE];
+            _buffer = new ubyte[zlibBufferSize];
         _init = true;
     }
 
@@ -154,7 +154,7 @@ struct ZlibInputStreamBase(Source) if (isSource!Source)
         {
             static if (_isDirect)
             {
-                auto slice = base.directRead(ZLIB_BUFFER_SIZE);
+                auto slice = base.directRead(zlibBufferSize);
                 if (slice.length == 0)
                     return 0;
                 _zStream.avail_in = to!uint(slice.length);
@@ -171,14 +171,14 @@ struct ZlibInputStreamBase(Source) if (isSource!Source)
         }
         _zStream.avail_out = to!uint(buf.length);
         _zStream.next_out = buf.ptr;
-        auto ret = inflate(&_zStream, Z_NO_FLUSH);
-        switch (ret)
+        auto res = inflate(&_zStream, Z_NO_FLUSH);
+        switch (res)
         {
         case Z_NEED_DICT:
         case Z_DATA_ERROR:
         case Z_MEM_ERROR:
             cleanup();
-            throw new ZlibException(ret);
+            throw new ZlibException(res);
         case Z_STREAM_END:
             cleanup();
             break;
@@ -218,7 +218,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink)
 	 * 	windowBits = Window bits.
 	 */
     this()(auto ref Sink stream, CompressionLevel level, Encoding encoding,
-        int windowBits = WINDOW_BITS_DEFAULT)
+        int windowBits = windowBitsDefault)
     {
 
         switch (encoding)
@@ -244,7 +244,7 @@ struct ZlibOutputStreamBase(Sink) if (isSink!Sink)
             throw new ZlibException(res);
         base = stream;
         _init = true;
-        _buffer = new ubyte[ZLIB_BUFFER_SIZE];
+        _buffer = new ubyte[zlibBufferSize];
     }
 
     ~this()
@@ -396,17 +396,15 @@ class ZlibException : Exception
 import std.typecons;
 import io.buffer : FixedBuffer;
 
-private template InputStreamType(Stream)
+private template GetInputStreamType(Stream)
 {
     static if (isDirectSource!Stream)
-        alias InputStreamType = RefCounted!(ZlibInputStreamBase!Stream,
-            RefCountedAutoInitialize.no);
+        alias GetInputStreamType = ZlibInputStreamBase!Stream;
     else
-        alias InputStreamType = RefCounted!(
-            FixedBuffer!(ZlibInputStreamBase!Stream), RefCountedAutoInitialize.no);
+        alias GetInputStreamType = FixedBuffer!(ZlibInputStreamBase!Stream);
 }
 
-alias ZlibInputStream(Stream) = InputStreamType!(Stream);
+alias ZlibInputStream(Stream) = RefCounted!(GetInputStreamType!Stream, RefCountedAutoInitialize.no);
 
 alias ZlibOutputStream(Stream) = RefCounted!(ZlibOutputStreamBase!Stream,
     RefCountedAutoInitialize.no);
