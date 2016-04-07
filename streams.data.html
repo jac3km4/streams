@@ -140,7 +140,7 @@
 This module contains methods which
  allow manipulating binary <span class="symbol-target" id="data">&nbsp;</span><a class="symbol-link" href="#data">data</a> in streams.</dd>
 </dl>
-<hr><div class="row-fluid declaration"><h3>T <span class="symbol-target" id="decode">&nbsp;</span><a class="symbol-link" href="#decode">decode</a>(T, Endian e = Endian.littleEndian, Source)(auto ref Source <i>source</i>) if (isSource!Source &amp;&amp; isScalarType!T);
+<hr><div class="row-fluid declaration"><h3>T <span class="symbol-target" id="decode">&nbsp;</span><a class="symbol-link" href="#decode">decode</a>(T, Endian E = Endian.littleEndian, Source)(auto ref Source <i>source</i>) if (isSource!Source &amp;&amp; isScalarType!T);
 </h3></div>
 <div class="declaration-content"><dl><p>Decodes a primitive value from a <i>source</i>
  taking care of endianess.
@@ -150,7 +150,7 @@ This module contains methods which
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="encode">&nbsp;</span><a class="symbol-link" href="#encode">encode</a>(Endian e = Endian.littleEndian, T, Sink)(auto ref Sink <i>sink</i>, T <i>t</i>) if (isSink!Sink &amp;&amp; isScalarType!T);
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="encode">&nbsp;</span><a class="symbol-link" href="#encode">encode</a>(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink <i>sink</i>, T <i>t</i>) if (isSink!Sink &amp;&amp; isScalarType!T);
 </h3></div>
 <div class="declaration-content"><dl><p>Encodes a primitive value into a <i>sink</i>
  taking care of endianess.
@@ -162,7 +162,7 @@ This module contains methods which
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>Struct <span class="symbol-target" id="rawRead">&nbsp;</span><a class="symbol-link" href="#rawRead">rawRead</a>(Struct, Endian e = Endian.littleEndian, Source)(auto ref Source <i>source</i>) if (isSource!Source &amp;&amp; is(Struct == struct));
+<hr><div class="row-fluid declaration"><h3>Struct <span class="symbol-target" id="rawRead">&nbsp;</span><a class="symbol-link" href="#rawRead">rawRead</a>(Struct, Endian E = Endian.littleEndian, Source)(auto ref Source <i>source</i>) if (isSource!Source &amp;&amp; is(Struct == struct));
 </h3></div>
 <div class="declaration-content"><dl><p>Interprets bytes from <i>source</i> as a structure
  taking care of endianess of it's members.
@@ -172,7 +172,7 @@ This module contains methods which
 </table></dd>
 </dl>
 </div>
-<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="rawWrite">&nbsp;</span><a class="symbol-link" href="#rawWrite">rawWrite</a>(Endian e = Endian.littleEndian, Struct, Sink)(auto ref Sink <i>sink</i>, in Struct <i>s</i>) if (isSink!Sink &amp;&amp; is(Struct == struct));
+<hr><div class="row-fluid declaration"><h3>void <span class="symbol-target" id="rawWrite">&nbsp;</span><a class="symbol-link" href="#rawWrite">rawWrite</a>(Struct, Endian E = Endian.littleEndian, Sink)(auto ref Sink <i>sink</i>, in Struct <i>s</i>) if (isSink!Sink &amp;&amp; is(Struct == struct));
 </h3></div>
 <div class="declaration-content"><dl><p>Encodes a structure as a sequence of bytes
  taking care of endianess of it'<i>s</i> members.
