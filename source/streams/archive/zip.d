@@ -177,8 +177,7 @@ auto zipArchiveReader(Stream)(auto ref Stream s) if (isStream!Stream && isSeekab
 }
 
 /**
- * This structure is used to read
- * and manipulate Zip archives
+ * This structure is used to read Zip archives.
  */
 struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
 {
@@ -235,6 +234,9 @@ struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
         throw new ZipException("End of Central Directory record not found");
     }
 
+    /**
+	 * Returns an input range containing all archive members.
+	 */
     @nogc @safe @property auto entries() pure nothrow
     {
         import std.algorithm : map;
@@ -242,11 +244,17 @@ struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
         return _headers.map!(header => ZipEntry(_stream, header));
     }
 
+    /**
+     * Zip entry structure.
+     */
     struct ZipEntry
     {
         private Stream _stream;
         private FileHeader _header;
 
+        /**
+	    * Returns the name of an entry.
+	    */
         @property const(char[]) fileName()
         {
             if (_header.flags.efs)
@@ -259,6 +267,9 @@ struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
             }
         }
 
+        /**
+	     * Returns the comment associated to an entry.
+	     */
         @property const(char[]) comment()
         {
             if (_header.flags.efs)
@@ -271,11 +282,17 @@ struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
             }
         }
 
+        /**
+	     * Returns the size of an of an entry in bytes.
+	     */
         @property @safe @nogc size() pure nothrow
         {
             return _header.uncompressedSize;
         }
 
+        /**
+	     * Returns an input stream with the contents of an entry.
+	     */
         auto openReader()
         {
             import streams.zlib;
@@ -311,12 +328,16 @@ class ZipException : Exception
     }
 }
 
+/**
+ * Converts CP437 encoded bytes to UTF-8.
+ * 
+ * Note: It returns the original array if no conversion is required.
+ */
 static char[] cp437toUtf8(ubyte[] bytes)
 {
     /*
 	 * we check if the buffer contains special
 	 * cp437 codes which map to 2-byte utf8 codepoints
-	 * and if it doesn't we return a copy of it
 	 */
     int highCodes = 0;
     for (int i = 0; i < bytes.length; i++)
@@ -346,6 +367,9 @@ static char[] cp437toUtf8(ubyte[] bytes)
     return buffer;
 }
 
+/**
+ * Converts CP437 encoded byte to UTF-8 codepoint(s);
+ */
 static string cp437toUtf8(ubyte code)
 {
     switch (code)
