@@ -139,7 +139,7 @@ private struct FileHeader
 private struct EndOfCentralDirRecord
 {
     enum uint signature = 0x06054b50;
-    
+
     RawData data;
     alias data this;
 
@@ -171,16 +171,16 @@ private struct EndOfCentralDirRecord
     }
 }
 
-auto zipArchive(Stream)(auto ref Stream s) if (isStream!Stream && isSeekable!Stream)
+auto zipArchiveReader(Stream)(auto ref Stream s) if (isStream!Stream && isSeekable!Stream)
 {
-    return ZipArchive!Stream(s);
+    return ZipArchiveReader!Stream(s);
 }
 
 /**
  * This structure is used to read
  * and manipulate Zip archives
  */
-struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
+struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
 {
     private Stream _stream;
     private FileHeader[] _headers;
@@ -259,6 +259,23 @@ struct ZipArchive(Stream) if (isStream!Stream && isSeekable!Stream)
             }
         }
 
+        @property const(char[]) comment()
+        {
+            if (_header.flags.efs)
+            {
+                return cast(char[]) _header.comment;
+            }
+            else
+            {
+                return cp437toUtf8(_header.comment);
+            }
+        }
+
+        @property @safe @nogc size() pure nothrow
+        {
+            return _header.uncompressedSize;
+        }
+
         auto openReader()
         {
             import streams.zlib;
@@ -294,7 +311,7 @@ class ZipException : Exception
     }
 }
 
-char[] cp437toUtf8(ubyte[] bytes)
+static char[] cp437toUtf8(ubyte[] bytes)
 {
     /*
 	 * we check if the buffer contains special
@@ -329,7 +346,7 @@ char[] cp437toUtf8(ubyte[] bytes)
     return buffer;
 }
 
-string cp437toUtf8(ubyte code)
+static string cp437toUtf8(ubyte code)
 {
     switch (code)
     {

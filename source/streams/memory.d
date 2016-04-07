@@ -11,7 +11,7 @@ module streams.memory;
 private
 {
     import std.array : appender, Appender;
-	import std.conv: to;
+    import std.conv : to;
 
     import io.stream;
 
