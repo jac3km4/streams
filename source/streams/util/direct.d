@@ -24,8 +24,7 @@ enum isDirectSource(Source) = is(typeof({
  * If remaining bytes is less than size, then a
  * smaller slice is returned.
  */
-static const(ubyte[]) directRead(Source)(auto ref Source source, size_t size) if (
-        isDirectSource!Source)
+const(ubyte[]) directRead(Source)(auto ref Source source, size_t size) if (isDirectSource!Source)
 {
     auto pos = source.position;
     immutable remaining = source.length - pos;
@@ -46,7 +45,7 @@ static const(ubyte[]) directRead(Source)(auto ref Source source, size_t size) if
  * Provides a direct access to bytes from current
  * position to the end of stream.
  */
-static const(ubyte[]) directReadAll(Source)(auto ref Source source, size_t upTo = -1) if (
+const(ubyte[]) directReadAll(Source)(auto ref Source source, size_t upTo = -1) if (
         isDirectSource!Source)
 {
     if (upTo == -1)

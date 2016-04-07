@@ -38,7 +38,7 @@ struct TARFileHeader
     ubyte[12] padding;
 }
 
-static auto tarArchive(Stream)(auto ref Stream stream) if (isStream!Stream)
+auto tarArchive(Stream)(auto ref Stream stream) if (isStream!Stream)
 {
     return TarArchive!Stream(stream);
 }
@@ -46,7 +46,7 @@ static auto tarArchive(Stream)(auto ref Stream stream) if (isStream!Stream)
 struct TarArchiveBase(Stream) if (isStream!Stream)
 {
     static assert(isSeekable!Stream, "Stream must be seekable");
-    
+
     private Stream _stream;
 
     this()(auto ref Stream stream)

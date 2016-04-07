@@ -25,8 +25,7 @@ enum BZIP_BUFFER_SIZE = 8 * 1024;
  *  small = Whether the library will use an alternative decompression algorithm
  * 			which uses less memory but at the cost of decompressing more slowly.
  */
-static auto bzipInputStream(Stream)(auto ref Stream stream, bool small = false) if (
-        isSource!Stream)
+auto bzipInputStream(Stream)(auto ref Stream stream, bool small = false) if (isSource!Stream)
 {
     auto s = BzipInputStream!Stream(stream, small);
     static if (!isDirectSource!Stream)
@@ -43,7 +42,7 @@ static auto bzipInputStream(Stream)(auto ref Stream stream, bool small = false) 
  * 				and the actual block size used is 100000 x this figure.
  * 				9 gives the best compression but takes most memory.
  */
-static auto bzipOutputStream(Stream)(auto ref Stream stream, BlockSize blockSize = BlockSize.Normal) if (
+auto bzipOutputStream(Stream)(auto ref Stream stream, BlockSize blockSize = BlockSize.Normal) if (
         isSink!Stream)
 {
     return BzipOutputStream!Stream(stream, blockSize);
@@ -262,7 +261,7 @@ enum BlockSize : int
 
 class BzipException : Exception
 {
-    @safe this(int err) pure nothrow
+    @safe this(int err, in string file = __FILE__, size_t line = __LINE__, Throwable next = null) pure nothrow
     {
         import std.conv : to;
 
@@ -291,12 +290,13 @@ class BzipException : Exception
             msg = "Undefined error: " ~ to!string(err);
             break;
         }
-        super(msg);
+        super(msg, file, line, next);
     }
 
-    @nogc @safe this(in string msg) pure nothrow
+    @nogc @safe this(in string message, in string file = __FILE__,
+        size_t line = __LINE__, Throwable next = null) pure nothrow
     {
-        super(msg);
+        super(message, file, line, next);
     }
 }
 
@@ -306,13 +306,12 @@ import io.buffer : FixedBuffer;
 private template InputStreamType(Stream)
 {
     static if (isDirectSource!Stream)
-        alias type = BzipInputStreamBase!Stream;
+        alias InputStreamType = BzipInputStreamBase!Stream;
     else
-        alias type = FixedBuffer!(BzipInputStreamBase!Stream);
+        alias InputStreamType = FixedBuffer!(BzipInputStreamBase!Stream);
 }
 
-alias BzipInputStream(Stream) = RefCounted!(InputStreamType!(Stream).type,
-    RefCountedAutoInitialize.no);
+alias BzipInputStream(Stream) = RefCounted!(InputStreamType!(Stream), RefCountedAutoInitialize.no);
 
 alias BzipOutputStream(Stream) = RefCounted!(BzipOutputStreamBase!Stream,
     RefCountedAutoInitialize.no);

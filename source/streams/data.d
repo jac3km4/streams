@@ -29,7 +29,7 @@ private enum doesNeedSwap(T, Endian E) = T.sizeof > 1 && endian != E;
  * Params:
  * 	source = Stream to read from.
  */
-static T decode(T, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
+T decode(T, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
         isSource!Source && isScalarType!T)
 {
     static if (isDirectSource!Source)
@@ -61,7 +61,7 @@ static T decode(T, Endian E = Endian.littleEndian, Source)(auto ref Source sourc
  * 	sink = Stream to write into.
  * 	t = Value to encode.
  */
-static void encode(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, T t) if (
+void encode(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, T t) if (
         isSink!Sink && isScalarType!T)
 {
     static if (doesNeedSwap!(T, E))
@@ -83,7 +83,7 @@ static void encode(T, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, 
  * Params:
  * 	source = Stream to read from.
  */
-static Struct rawRead(Struct, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
+Struct rawRead(Struct, Endian E = Endian.littleEndian, Source)(auto ref Source source) if (
         isSource!Source && is(Struct == struct))
 {
     static if (isDirectSource!Source)
@@ -115,8 +115,8 @@ static Struct rawRead(Struct, Endian E = Endian.littleEndian, Source)(auto ref S
  * 	sink = Stream to write into.
  * 	s = Structure to encode.
  */
-static void rawWrite(Struct, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink,
-    in Struct s) if (isSink!Sink && is(Struct == struct))
+void rawWrite(Struct, Endian E = Endian.littleEndian, Sink)(auto ref Sink sink, in Struct s) if (
+        isSink!Sink && is(Struct == struct))
 {
     static if (endian != E)
     {

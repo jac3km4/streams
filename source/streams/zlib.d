@@ -28,7 +28,7 @@ enum ZLIB_BUFFER_SIZE = 256 * 1024;
  * 	encoding = Encoding to use.
  * 	windowBits = Window bits.
  */
-static auto zlibInputStream(Stream)(auto ref Stream stream,
+auto zlibInputStream(Stream)(auto ref Stream stream,
     Encoding encoding = Encoding.Guess, int windowBits = WINDOW_BITS_DEFAULT) if (isSource!Stream)
 {
     auto s = ZlibInputStream!Stream(stream, encoding, windowBits);
@@ -44,7 +44,7 @@ static auto zlibInputStream(Stream)(auto ref Stream stream,
  * 	stream = Base stream.
  * 	level = Compression level.
  */
-static auto zlibOutputStream(Stream)(auto ref Stream stream,
+auto zlibOutputStream(Stream)(auto ref Stream stream,
     CompressionLevel level = CompressionLevel.Normal) if (isSink!Stream)
 {
     return zlibOutputStream(stream, level, Encoding.Zlib);
@@ -59,9 +59,8 @@ static auto zlibOutputStream(Stream)(auto ref Stream stream,
  * 	encoding = Encoding to use.
  * 	windowBits = Window bits.
  */
-static auto zlibOutputStream(Stream)(auto ref Stream stream,
-    CompressionLevel level, Encoding encoding, int windowBits = WINDOW_BITS_DEFAULT) if (
-        isSink!Stream)
+auto zlibOutputStream(Stream)(auto ref Stream stream, CompressionLevel level,
+    Encoding encoding, int windowBits = WINDOW_BITS_DEFAULT) if (isSink!Stream)
 {
     return ZlibOutputStream!Stream(stream, level, encoding, windowBits);
 }
@@ -351,7 +350,7 @@ enum CompressionLevel : int
 
 class ZlibException : Exception
 {
-    @nogc @safe this(int err) pure nothrow
+    @safe this(int err, in string file = __FILE__, size_t line = __LINE__, Throwable next = null) pure nothrow
     {
         string msg;
         switch (err)
@@ -384,12 +383,13 @@ class ZlibException : Exception
             msg = "Undefined error";
             break;
         }
-        super(msg);
+        super(msg, file, line, next);
     }
 
-    @nogc @safe this(in string msg) pure nothrow
+    @nogc @safe this(in string message, in string file = __FILE__,
+        size_t line = __LINE__, Throwable next = null) pure nothrow
     {
-        super(msg);
+        super(message, file, line, next);
     }
 }
 
@@ -399,12 +399,14 @@ import io.buffer : FixedBuffer;
 private template InputStreamType(Stream)
 {
     static if (isDirectSource!Stream)
-        alias type = RefCounted!(ZlibInputStreamBase!Stream, RefCountedAutoInitialize.no);
+        alias InputStreamType = RefCounted!(ZlibInputStreamBase!Stream,
+            RefCountedAutoInitialize.no);
     else
-        alias type = RefCounted!(FixedBuffer!(ZlibInputStreamBase!Stream), RefCountedAutoInitialize.no);
+        alias InputStreamType = RefCounted!(
+            FixedBuffer!(ZlibInputStreamBase!Stream), RefCountedAutoInitialize.no);
 }
 
-alias ZlibInputStream(Stream) = InputStreamType!(Stream).type;
+alias ZlibInputStream(Stream) = InputStreamType!(Stream);
 
 alias ZlibOutputStream(Stream) = RefCounted!(ZlibOutputStreamBase!Stream,
     RefCountedAutoInitialize.no);

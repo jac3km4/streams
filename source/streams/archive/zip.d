@@ -328,9 +328,10 @@ struct ZipArchiveReader(Stream) if (isStream!Stream && isSeekable!Stream)
 
 class ZipException : Exception
 {
-    @nogc @safe this(in string msg) pure nothrow
+    @nogc @safe this(in string message, in string file = __FILE__,
+        size_t line = __LINE__, Throwable next = null) pure nothrow
     {
-        super(msg);
+        super(message, file, line, next);
     }
 }
 

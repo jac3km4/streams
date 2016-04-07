@@ -20,7 +20,7 @@ private
  * 	path = Path to the file.
  * 	flags = File flags.
  */
-static auto fileStream(string path, FileFlags flags = FileFlags.readExisting)
+auto fileStream(string path, FileFlags flags = FileFlags.readExisting)
 {
     return File(path, flags);
 }
@@ -32,7 +32,7 @@ static auto fileStream(string path, FileFlags flags = FileFlags.readExisting)
  * 	path = Path to the file.
  * 	flags = File flags.
  */
-static auto unbufferedFileStream(string path, FileFlags flags = FileFlags.readExisting)
+auto unbufferedFileStream(string path, FileFlags flags = FileFlags.readExisting)
 {
     return UnbufferedFile(path, flags);
 }
@@ -47,7 +47,7 @@ static auto unbufferedFileStream(string path, FileFlags flags = FileFlags.readEx
  * 	upTo = Maximum number of bytes to copy (all if -1).
  * 	bufferSize = The size of memory buffer to use.
  */
-static void copyTo(Source, Sink)(auto ref Source source, auto ref Sink sink,
+void copyTo(Source, Sink)(auto ref Source source, auto ref Sink sink,
     size_t upTo = -1, size_t bufferSize = 64 * 1024) if (isSource!Source && isSink!Sink)
 {
     import std.array : uninitializedArray;

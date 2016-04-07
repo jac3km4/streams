@@ -22,8 +22,7 @@ private
  * 	start = Offset of the slice stream in the original stream.
  * 	length = Length of the slice stream.
  */
-static auto sliceStream(Source)(auto ref Source source, size_t start, size_t length) if (
-        isSource!Source)
+auto sliceStream(Source)(auto ref Source source, size_t start, size_t length) if (isSource!Source)
 {
     return SliceStream!Source(source, start, length);
 }

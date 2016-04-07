@@ -24,7 +24,7 @@ private
  * Params:
  * 	data = Immutable byte array.
  */
-static @nogc auto memoryStream(immutable(ubyte)[] data) nothrow
+@nogc auto memoryStream(immutable(ubyte)[] data) nothrow
 {
     return ReadOnlyMemoryStream(data);
 }
@@ -35,7 +35,7 @@ static @nogc auto memoryStream(immutable(ubyte)[] data) nothrow
  * Params:
  * 	data = Byte array.
  */
-static auto memoryStream(ubyte[] data) nothrow
+auto memoryStream(ubyte[] data) nothrow
 {
     return MemoryStream(data);
 }
@@ -46,7 +46,7 @@ static auto memoryStream(ubyte[] data) nothrow
  * Params:
  * 	size = Amount of bytes to preallocate.
  */
-static auto memoryStream(size_t size)
+auto memoryStream(size_t size)
 {
     return MemoryStream(size);
 }
@@ -54,7 +54,7 @@ static auto memoryStream(size_t size)
 /**
  * Creates a memory stream.
  */
-static auto memoryStream()
+auto memoryStream()
 {
     import std.typecons : refCounted;
 
@@ -70,8 +70,8 @@ static auto memoryStream()
  * 	upTo = Maximum number of bytes to copy (all if -1).
  * 	bufferSize = The size of memory buffer to use (if it's required).
  */
-static auto copyToMemory(Source)(auto ref Source source, size_t upTo = -1,
-    size_t bufferSize = 64 * 1024) if (isSource!Source)
+auto copyToMemory(Source)(auto ref Source source, size_t upTo = -1, size_t bufferSize = 64 * 1024) if (
+        isSource!Source)
 {
     import streams.util.direct : directRead, isDirectSource;
 
