@@ -139,16 +139,25 @@
 <dt>Description:</dt><dd>
 This module provides an interface to access Zip files</dd>
 </dl>
+<hr><div class="row-fluid declaration"><h3>auto <span class="symbol-target" id="zipArchiveReader">&nbsp;</span><a class="symbol-link" href="#zipArchiveReader">zipArchiveReader</a>(Stream)(auto ref Stream <i>s</i>) if (isStream!Stream &amp;&amp; isSeekable!Stream);
+</h3></div>
+<div class="declaration-content"><dl><p>Opens an existing zip archive from a stream.
+</p>
+<dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>stream</td>
+<td>Stream to read the archive from.</td></tr>
+</table></dd>
+</dl>
+</div>
 <hr><div class="row-fluid declaration"><h3>struct <span class="symbol-target" id="ZipArchiveReader">&nbsp;</span><a class="symbol-link" href="#ZipArchiveReader">ZipArchiveReader</a>(Stream) if (isStream!Stream &amp;&amp; isSeekable!Stream);
 </h3></div>
 <div class="declaration-content"><dl><p>This structure is used to read Zip archives.</p>
 </dl>
 <div class="offset1 member-list"><hr><div class="row-fluid declaration"><h3>this()(auto ref Stream <i>stream</i>);
 </h3></div>
-<div class="declaration-content"><dl><p>Opens an existing zip archive from a <i>stream</i>
+<div class="declaration-content"><dl><p>Opens an existing zip archive from a <i>stream</i>.
 </p>
 <dt>Parameters</dt><dd><table class="table table-condensed table-bordered"><tr><td>Stream <i>stream</i></td>
-<td>Stream to read archive from</td></tr>
+<td>Stream to the read archive from.</td></tr>
 </table></dd>
 </dl>
 </div>
